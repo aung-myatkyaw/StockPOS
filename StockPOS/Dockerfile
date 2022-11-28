@@ -11,6 +11,8 @@ COPY ["StockPOS/StockPOS.csproj", "StockPOS/"]
 RUN dotnet restore "StockPOS/StockPOS.csproj"
 COPY . .
 WORKDIR "/src/StockPOS"
+
+#ENV MysqlDbSettings:Password="${DB_PWD}"
 RUN dotnet build "StockPOS.csproj" -c Release -o /app/build
 
 FROM build AS publish
