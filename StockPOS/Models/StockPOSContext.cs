@@ -38,7 +38,7 @@ namespace StockPOS.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseMySql(_connectionString, Microsoft.EntityFrameworkCore.ServerVersion.Parse("5.7.11-mysql"));
+                optionsBuilder.UseMySql(_connectionString, ServerVersion.Parse("8.0.31-mysql"));
             }
         }
 
