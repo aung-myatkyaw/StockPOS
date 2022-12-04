@@ -27,9 +27,10 @@ builder.WebHost
 // Add services to the container.
 
 var mysqlDbSettings = builder.Configuration.GetSection(nameof(MysqlDbSettings)).Get<MysqlDbSettings>();
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 31));
 
 builder.Services.ConfigureCors(builder.Configuration);
-builder.Services.AddDbContext<StockPOSContext>(opt => opt.UseMySql(mysqlDbSettings.ConnectionString, ServerVersion.Parse("8.0.31-mysql")));
+builder.Services.AddDbContext<StockPOSContext>(opt => opt.UseMySql(mysqlDbSettings.ConnectionString, serverVersion));
 
 builder.Services.ConfigureRepositoryWrapper();
 
@@ -61,12 +62,13 @@ builder.Services.AddHealthChecks()
                 );
 
 builder.Services.AddMvc(option => option.EnableEndpointRouting = false)
- .AddNewtonsoftJson(o => {
+ .AddNewtonsoftJson(o =>
+ {
      o.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
      o.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Include;
      o.SerializerSettings.DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Include;      //it must be Include, otherwise default value (boolean=false, int=0, int?=null, object=null) will be missing in response json			
      o.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
- }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+ });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 

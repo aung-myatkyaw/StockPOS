@@ -12,7 +12,7 @@ namespace StockPOS.Settings
         { 
             get
             {
-                return $"server={Host};database={Database};user={User};password={Password};Convert Zero Datetime=True;TreatTinyAsBoolean=false;";
+                return $"server={Host};database={Database};user={User};password={Password};Convert Zero Datetime=True;TreatTinyAsBoolean=true;";
             }
         }
     }

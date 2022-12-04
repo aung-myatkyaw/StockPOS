@@ -16,6 +16,7 @@ namespace StockPOS.Models
         private string _connectionString;
         public readonly IHttpContextAccessor _httpContextAccessor;
         public readonly IActionContextAccessor _actionContextAccessor;
+        private MySqlServerVersion serverVersion;
 
         public StockPOSContext(DbContextOptions<StockPOSContext> options, IHttpContextAccessor httpContextAccessor, IActionContextAccessor actionContextAccessor, IConfiguration configuration)
             : base(options)
@@ -25,6 +26,8 @@ namespace StockPOS.Models
             _configuration = configuration;
             var mysqlDbSettings = _configuration.GetSection(nameof(MysqlDbSettings)).Get<MysqlDbSettings>();
             _connectionString = mysqlDbSettings.ConnectionString;
+
+            serverVersion = new MySqlServerVersion(new Version(8, 0, 31));
         }
 
         public virtual DbSet<Bought> Boughts { get; set; }
@@ -38,7 +41,7 @@ namespace StockPOS.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseMySql(_connectionString, ServerVersion.Parse("8.0.31-mysql"));
+                optionsBuilder.UseMySql(_connectionString, serverVersion);
             }
         }
 
