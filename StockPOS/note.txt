@@ -1,0 +1,49 @@
+﻿# Database Scaffold Command
+dotnet ef dbcontext scaffold "server=localhost;database=posxwin;user=admin;password={{PASSWORD}};Convert Zero Datetime=True;TreatTinyAsBoolean=true;" "Pomelo.EntityFrameworkCore.MySql" -o Models -c StockPOSContext -f --no-onconfiguring --data-annotations
+ 
+# Generate Unique ID String
+public dynamic GetRedeemNo(string CompanyID)
+        {
+            string RedeemNo = "";
+            string maxNO = "";
+            int max = 0;
+            string ID = "";
+            DateTime DateQuery;
+            String now = DateTime.Now.ToString("yyyyMMdd");
+            DateTime now1 = DateTime.Now.Date;
+
+            var count = (from c in RepositoryContext.Redeem where c.CompanyID == CompanyID select c.RedeemID).Count();
+            if (count > 0)
+            {
+                DateQuery = (from PI in RepositoryContext.Redeem
+                             where PI.CompanyID == CompanyID
+                             orderby PI.RedeemID
+                             select PI.ModifiedDate.Date).Last();
+
+                if (now1 == DateQuery)
+                {
+                    ID = (from po in RepositoryContext.Redeem
+                          where po.ModifiedDate.Date == now1 && po.CompanyID == CompanyID
+                          orderby po.RedeemID
+                          select po.RedeemID).Last();
+
+                    //PDate = ID.Substring(5, 8);
+                    maxNO = ID.Substring(14, 6);
+                    //maxNO = (from p in RepositoryContext.Redeem where p.CompanyID == CompanyID select p.TransactionID.Substring(6, 5)).Last();
+                    max = int.Parse(maxNO) + 1;
+                    var comNo = (max).ToString();
+                    var no = string.Format("{0:000000}", int.Parse(comNo));
+                    RedeemNo = "RD" + CompanyID + "-" + now + "-" + no;
+                }
+
+                else
+                {
+                    RedeemNo = "RD" + CompanyID + "-" + now + "-000001";
+                }
+            }
+            else
+            {
+                RedeemNo = "RD" + CompanyID + "-" + now + "-000001";
+            }
+            return RedeemNo;
+        }

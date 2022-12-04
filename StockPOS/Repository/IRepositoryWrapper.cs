@@ -6,12 +6,9 @@ namespace StockPOS.Repository
 {
     public interface IRepositoryWrapper
     {
-
-        IBoughtRepository Bought { get; }
-
         IEventlogRepository Eventlog { get; }
 
-        ICashierRepository Cashier { get; }
+        IUserRepository User { get; }
 
         IProductRepository Product { get; }
 

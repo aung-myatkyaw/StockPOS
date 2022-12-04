@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace StockPOS.Models
 {
-    public record CashierRegisterDTO(
+    public record UserRegisterDTO(
         int Id,
         [StringLength(50)]
         string FullName,
@@ -21,10 +21,12 @@ namespace StockPOS.Models
         string Email,
         [Required]
         [StringLength(255)]
-        string Password
+        string Password,
+        [Required]
+        int UserTypeId
     );
 
-    public record CashierDTO(
+    public record UserDTO(
         int Id,
         string FullName,
         string UserName,
@@ -32,10 +34,11 @@ namespace StockPOS.Models
         string Gender,
         string Address,
         string Phone,
-        string Email
+        string Email,
+        int UserTypeId
     );
 
-    public record CashierLoginDTO(
+    public record UserLoginDTO(
         [Required]
         string UserName,
         [Required]

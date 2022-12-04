@@ -51,7 +51,7 @@ namespace StockPOS.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutSale(int id, Sale Sale)
         {
-            if (id != Sale.Id)
+            if (id != Sale.SaleId)
             {
                 return BadRequest(new { status = "fail", data = "Bad Parameters." });
             }
@@ -91,11 +91,11 @@ namespace StockPOS.Controllers
                 await _repositoryWrapper.Sale.CreateAsync(Sale);
                 await _repositoryWrapper.Eventlog.Insert(Sale);
 
-                return CreatedAtAction(nameof(GetSale), new { id = Sale.Id }, new { status = "success", data = Sale });
+                return CreatedAtAction(nameof(GetSale), new { id = Sale.SaleId }, new { status = "success", data = Sale });
             }
             catch (DbUpdateException)
             {
-                if (await SaleExists(Sale.Id))
+                if (await SaleExists(Sale.SaleId))
                 {
                     return Conflict(new { status = "fail", data = "Data Already Exist."});
                 }

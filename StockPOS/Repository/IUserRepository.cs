@@ -5,7 +5,7 @@ using StockPOS.Models;
 
 namespace StockPOS.Repository
 {
-    public interface ICashierRepository : IRepositoryBase<Cashier>
+    public interface IUserRepository : IRepositoryBase<User>
     {
         Task<bool> CheckExistingUserName(string username);
     }

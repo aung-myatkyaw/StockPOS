@@ -49,9 +49,9 @@ namespace StockPOS.Controllers
         // PUT: api/Productcategory/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProductcategory(int id, Productcategory Productcategory)
+        public async Task<IActionResult> PutProductcategory(string id, Productcategory Productcategory)
         {
-            if (id != Productcategory.Id)
+            if (id != Productcategory.CategoryId)
             {
                 return BadRequest(new { status = "fail", data = "Bad Parameters." });
             }
@@ -91,11 +91,11 @@ namespace StockPOS.Controllers
                 await _repositoryWrapper.Productcategory.CreateAsync(Productcategory);
                 await _repositoryWrapper.Eventlog.Insert(Productcategory);
 
-                return CreatedAtAction(nameof(GetProductcategory), new { id = Productcategory.Id }, new { status = "success", data = Productcategory });
+                return CreatedAtAction(nameof(GetProductcategory), new { id = Productcategory.CategoryId }, new { status = "success", data = Productcategory });
             }
             catch (DbUpdateException)
             {
-                if (await ProductcategoryExists(Productcategory.Id))
+                if (await ProductcategoryExists(Productcategory.CategoryId))
                 {
                     return Conflict(new { status = "fail", data = "Data Already Exist."});
                 }
@@ -135,7 +135,7 @@ namespace StockPOS.Controllers
             }
         }
 
-        private async Task<bool> ProductcategoryExists(int id)
+        private async Task<bool> ProductcategoryExists(string id)
         {
             return await _repositoryWrapper.Productcategory.IsExist(id);
         }

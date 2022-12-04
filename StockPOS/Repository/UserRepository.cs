@@ -7,16 +7,16 @@ using StockPOS.Models;
 
 namespace StockPOS.Repository
 {
-    public class CashierRepository: RepositoryBase<Cashier>, ICashierRepository
+    public class UserRepository: RepositoryBase<User>, IUserRepository
     {
-        public CashierRepository(StockPOSContext repositoryContext)
+        public UserRepository(StockPOSContext repositoryContext)
             :base(repositoryContext)
         {
         }
 
         public async Task<bool> CheckExistingUserName(string username)
         {
-            return await RepositoryContext.Cashiers.AnyAsync(e => e.UserName == username);
+            return await RepositoryContext.Users.AnyAsync(e => e.UserName == username);
         }
     }
 }

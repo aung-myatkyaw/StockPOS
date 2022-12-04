@@ -8,21 +8,6 @@ namespace StockPOS.Repository
     {
         private StockPOSContext _repoContext;
 
-
-        private IBoughtRepository oBought;
-        public IBoughtRepository Bought
-        {
-            get
-            {
-                if (oBought == null)
-                {
-                    oBought = new BoughtRepository(_repoContext);
-                }
-
-                return oBought;
-            }
-        }
-
         private IEventlogRepository oEventlog;
         public IEventlogRepository Eventlog
         {
@@ -37,17 +22,17 @@ namespace StockPOS.Repository
             }
         }
 
-        private ICashierRepository oCashier;
-        public ICashierRepository Cashier
+        private IUserRepository oUser;
+        public IUserRepository User
         {
             get
             {
-                if (oCashier == null)
+                if (oUser == null)
                 {
-                    oCashier = new CashierRepository(_repoContext);
+                    oUser = new UserRepository(_repoContext);
                 }
 
-                return oCashier;
+                return oUser;
             }
         }
 

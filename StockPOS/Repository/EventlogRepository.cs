@@ -36,13 +36,15 @@ namespace StockPOS.Repository
             {
                 try
                 {
-                    var newobj = new Eventlog();
-                    newobj.LogType = LogType;
-                    newobj.LogDateTime = DateTime.UtcNow;
-                    newobj.LogMessage = LogMessage;
-                    newobj.ErrorMessage = ErrMessage;
-                    newobj.Source = Source;
-                    newobj.FormName = FormName.Trim();
+                    var newobj = new Eventlog
+                    {
+                        LogType = LogType,
+                        LogDateTime = DateTime.UtcNow,
+                        LogMessage = LogMessage,
+                        ErrorMessage = ErrMessage,
+                        Source = Source,
+                        FormName = FormName.Trim()
+                    };
 
                     if (LoginUserID != "0")
                     {

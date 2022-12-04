@@ -52,7 +52,7 @@ namespace StockPOS.CustomTokenAuthProvider
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            TokenData _tokenData = null;
+            TokenData _tokenData = new TokenData();
             var access_token = string.Empty;
 
             if (context.Request.Path.Equals(_options.Path, StringComparison.Ordinal))
@@ -131,7 +131,7 @@ namespace StockPOS.CustomTokenAuthProvider
                 string strPath = context.Request.Path.ToString();
                 
                 // you can add with || multiple publically available functions to skip login
-                if (strPath.StartsWith("swagger") == true || strPath.Equals("/api/cashier/registration", StringComparison.OrdinalIgnoreCase))
+                if (strPath.StartsWith("swagger") == true || strPath.Equals("/api/user/registration", StringComparison.OrdinalIgnoreCase))
                 {
                     await next(context);
                 }
@@ -142,8 +142,6 @@ namespace StockPOS.CustomTokenAuthProvider
                 }
                 else
                 {
-                    //Regenerate newtoken for not timeout at running
-                    string newToken = string.Empty;
                     try
                     {
                         // check token expired   
@@ -167,8 +165,9 @@ namespace StockPOS.CustomTokenAuthProvider
                         var appIdentity = new ClaimsIdentity(claims);
                         context.User.AddIdentity(appIdentity); //add custom identity because default identity has delay to get data in EventLogRepository
 
+                        //Regenerate newtoken for not timeout at running
                         // Create the JWT and write it to a string
-                        newToken = CreateEncryptedJWTToken(claims);
+                        string newToken = CreateEncryptedJWTToken(claims);
 
                         if (!string.IsNullOrEmpty(newToken))
                         {
@@ -194,21 +193,19 @@ namespace StockPOS.CustomTokenAuthProvider
             string password = string.Empty;
             try
             {
-                using (var reader = new System.IO.StreamReader(context.Request.Body))
+                using var reader = new StreamReader(context.Request.Body);
+                var request_body = reader.ReadToEnd();
+                UserLoginDTO userData = JsonConvert.DeserializeObject<UserLoginDTO>(request_body, _serializerSettings);
+                if (string.IsNullOrEmpty(userData.UserName) || string.IsNullOrEmpty(userData.Password))
                 {
-                    var request_body = reader.ReadToEnd();
-                    CashierLoginDTO userData = JsonConvert.DeserializeObject<CashierLoginDTO>(request_body, _serializerSettings);
-                    if (string.IsNullOrEmpty(userData.UserName) || string.IsNullOrEmpty(userData.Password))
-                    {
-                        await _repository.Eventlog.Error("Invalid login credentials", "UserName:" + userData.UserName + ", Password: " + userData.Password);
-                        await ResponseMessage(new { status = "fail", data = "Invalid login credentials" }, context, StatusCodes.Status422UnprocessableEntity);
-                        return;
-                    }
-                    // phoneno = Encryption.DecryptClient_String(userData.PhoneNumber);
-                    // password = Encryption.DecryptClient_String(userData.Password);
-                    username = userData.UserName;
-                    password = userData.Password;
+                    await _repository.Eventlog.Error("Invalid login credentials", "UserName:" + userData.UserName + ", Password: " + userData.Password);
+                    await ResponseMessage(new { status = "fail", data = "Invalid login credentials" }, context, StatusCodes.Status422UnprocessableEntity);
+                    return;
                 }
+                // phoneno = Encryption.DecryptClient_String(userData.PhoneNumber);
+                // password = Encryption.DecryptClient_String(userData.Password);
+                username = userData.UserName;
+                password = userData.Password;
             }
             catch (Exception ex)
             {
@@ -220,7 +217,7 @@ namespace StockPOS.CustomTokenAuthProvider
 
             try 
             {
-                dynamic loginresult = null;
+                dynamic? loginresult = null;
                 int UserID;
                 string UserName;
 
@@ -228,7 +225,7 @@ namespace StockPOS.CustomTokenAuthProvider
                 if(loginresult.error == 0)
                 {
                     loginresult = loginresult.data;
-                    UserID = loginresult.Id;
+                    UserID = loginresult.UserId;
                     UserName = loginresult.UserName;
                 }
                 else 
@@ -239,13 +236,15 @@ namespace StockPOS.CustomTokenAuthProvider
                 }
 
                 var now = DateTime.UtcNow;
-                var _tokenData = new TokenData();
-                _tokenData.Sub = UserName;
-                _tokenData.Jti = await _options.NonceGenerator();
-                _tokenData.Iat = new DateTimeOffset(now).ToUniversalTime().ToUnixTimeSeconds().ToString();
-                _tokenData.UserID = UserID.ToString();
-                _tokenData.UserName = UserName;
-                _tokenData.TicketExpireDate = now.Add(_options.Expiration);
+                var _tokenData = new TokenData
+                {
+                    Sub = UserName,
+                    Jti = await _options.NonceGenerator(),
+                    Iat = new DateTimeOffset(now).ToUniversalTime().ToUnixTimeSeconds().ToString(),
+                    UserID = UserID.ToString(),
+                    UserName = UserName,
+                    TicketExpireDate = now.Add(_options.Expiration)
+                };
                 var claims = Globalfunction.GetClaims(_tokenData);
 
                 var appIdentity = new ClaimsIdentity(claims);
@@ -257,8 +256,8 @@ namespace StockPOS.CustomTokenAuthProvider
                 {
                     AccessToken = encodedJwt,
                     ExpiresInSeconds = (int)_options.Expiration.TotalSeconds,
-                    CashierId = UserID,
-                    UserName = UserName
+                    UserId = UserID,
+                    UserName
                 };
 
                 var response = new
@@ -274,7 +273,7 @@ namespace StockPOS.CustomTokenAuthProvider
             catch(Exception ex) 
             {
                 Globalfunction.WriteSystemLog("Generate Token Fail: " + username + ", Error: " + ex.Message); 
-                await _repository.Eventlog.Error("Generate Token Fail for" + username, ex.Message); 
+                await _repository.Eventlog.Error("Generate Token Fail for " + username, ex.Message); 
                 await ResponseMessage(new { status = "fail", data = "Generate Token Fail" }, context, StatusCodes.Status401Unauthorized);
                 return;
             }
@@ -284,11 +283,11 @@ namespace StockPOS.CustomTokenAuthProvider
         {
             try 
             {
-                Cashier result = (await _repository.Cashier.FindByConditionAsync(x => x.UserName == username)).FirstOrDefault();
+                User result = (await _repository.User.FindByConditionAsync(x => x.UserName == username)).FirstOrDefault();
                 if (result == null)
                 {
-                    await _repository.Eventlog.Warning("Cashier not found with UserName: " + username);
-                    return new { error = 1, message = "Cashier not found with UserName: " + username };
+                    await _repository.Eventlog.Warning("User not found with UserName: " + username);
+                    return new { error = 1, message = "User not found with UserName: " + username };
                 }
     
                 string oldhash = result.Password; 
@@ -325,7 +324,7 @@ namespace StockPOS.CustomTokenAuthProvider
                 Issuer = _options.Issuer,
                 Subject = new ClaimsIdentity(claims),
                 NotBefore = now,
-                IssuedAt = Globalfunction.UnixTimeStampToDateTime(Int32.Parse(claims.First(claim => claim.Type == "iat").Value)),  //reuse same Iat
+                IssuedAt = Globalfunction.UnixTimeStampToDateTime(int.Parse(claims.First(claim => claim.Type == "iat").Value)),  //reuse same Iat
                 Expires = now.Add(_options.Expiration),
                 SigningCredentials = _options.SigningCredentials,
                 EncryptingCredentials = new EncryptingCredentials(new SymmetricSecurityKey(_tokenencKey), SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes256CbcHmacSha512)

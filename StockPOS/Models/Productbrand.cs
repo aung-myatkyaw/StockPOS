@@ -6,27 +6,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace StockPOS.Models
 {
-    [Table("productcategory")]
+    [Table("productbrand")]
     [MySqlCharSet("utf8mb3")]
     [MySqlCollation("utf8mb3_general_ci")]
-    public partial class Productcategory
+    public partial class Productbrand
     {
-        public Productcategory()
+        public Productbrand()
         {
             Products = new HashSet<Product>();
         }
 
         [Key]
-        [Column("CategoryID")]
+        [Column("BrandID")]
         [StringLength(15)]
-        public string CategoryId { get; set; } = null!;
-        [StringLength(100)]
-        public string? CategoryName { get; set; }
-        [Column(TypeName = "datetime")]
-        public DateTime? CreatedDate { get; set; }
-        public sbyte? Visible { get; set; }
+        public string BrandId { get; set; } = null!;
+        [StringLength(45)]
+        public string? BrandName { get; set; }
 
-        [InverseProperty("Category")]
+        [InverseProperty("Brand")]
         public virtual ICollection<Product> Products { get; set; }
     }
 }
