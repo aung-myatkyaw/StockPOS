@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "de6bc42b-e918-4702-99f9-4134d424a407",
-		"name": "MultiPOS",
+		"name": "StockPOS",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [

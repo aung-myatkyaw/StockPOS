@@ -1,0 +1,46 @@
+version: 0.2
+
+env:
+  variables:
+      AWS_DEFAULT_REGION: "ap-southeast-1"
+      ECR: "582415712618.dkr.ecr.ap-southeast-1.amazonaws.com"
+      REPO: "stockpos-backend"
+      VERSION: "v1.0.0"
+      LATEST: "latest"
+      DockerHub_USERNAME: "yinko2"
+      DOCKER_BUILDKIT: 1
+  parameter-store:
+      DB_PASSWORD: mysql-dbpassword
+      DockerHub_PASSWORD: dockerhub-password
+phases:
+  pre_build:
+    commands:
+      - echo Check Docker
+      - docker --version
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR
+      - echo Pull Latest Image for cache
+      - docker pull $ECR/$REPO:$LATEST || true
+      - echo Docker Hub Login
+      - docker login -u $DockerHub_USERNAME -p $DockerHub_PASSWORD
+      - Enter MySQL Password
+      - sed -i "s#{{PASSWORD}}#$DB_PASSWORD#g" ./StockPOS/appsettings.json
+  build:
+    commands:
+      - echo Building...
+      - docker build --file ./StockPOS/Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 --tag $ECR/$REPO:$VERSION --cache-from $ECR/$REPO:$LATEST .
+      - docker push $ECR/$REPO:$VERSION
+      - docker tag $ECR/$REPO:$VERSION $ECR/$REPO:$LATEST
+      - docker push $ECR/$REPO:$LATEST
+      - docker rmi $ECR/$REPO:$VERSION
+      - docker rmi $ECR/$REPO:$LATEST
+      - echo Build completed on `date`
+  post_build:
+    commands:
+      - echo Making File for CodeDeploy
+      - cp ./deploy/scripts/deploy.sh.tpl ./deploy.sh
+      - sed -i "s#{{DB_PASSWORD}}#$DB_PASSWORD#g" ./StockPOS/Deploy/docker-compose.yml
+artifacts:
+  files:
+    - 'StockPOS/Deploy/docker-compose.yml'
+    - 'StockPOS/Deploy/.env'
