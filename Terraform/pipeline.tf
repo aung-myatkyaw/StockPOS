@@ -1,6 +1,7 @@
 // Pipeline for building and deploying stockpos backend docker image to ec2 instance
 resource "aws_codepipeline" "stockpos_mumbai_backend_pipeline" {
-  name = var.backend_pipeline_name
+  provider = aws.mumbai
+  name     = var.backend_pipeline_name
 
   depends_on = [
     aws_spot_fleet_request.stockpos_mumbai_staging_fleet_request
@@ -93,6 +94,7 @@ resource "aws_codepipeline" "stockpos_mumbai_backend_pipeline" {
 
 // CodeBuild Project
 resource "aws_codebuild_project" "stockpos_mumbai_backend_build" {
+  provider               = aws.mumbai
   name                   = var.backend_build_name
   description            = "CodeBuild Project for Building and Pushing KMS Backend Docker Image to ECR"
   concurrent_build_limit = 1
@@ -130,6 +132,7 @@ resource "aws_codebuild_project" "stockpos_mumbai_backend_build" {
 
 // Cloud Watch Log Group
 resource "aws_cloudwatch_log_group" "stockpos_mumbai_backend_log_group" {
+  provider          = aws.mumbai
   name              = format("%s%s", "/aws/codebuild/", var.backend_build_name)
   retention_in_days = 30
 }

@@ -23,7 +23,7 @@ phases:
       - docker pull $ECR/$REPO:$LATEST || true
       - echo Docker Hub Login
       - docker login -u $DockerHub_USERNAME -p $DockerHub_PASSWORD
-      - Enter MySQL Password
+      - echo Inserting MySQL Password
       - sed -i "s#{{PASSWORD}}#$DB_PASSWORD#g" ./StockPOS/appsettings.json
   build:
     commands:
