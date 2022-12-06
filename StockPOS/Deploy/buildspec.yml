@@ -38,7 +38,7 @@ phases:
   post_build:
     commands:
       - echo Making File for CodeDeploy
-      - cp ./deploy/scripts/deploy.sh.tpl ./deploy.sh
+      # - cp ./deploy/scripts/deploy.sh.tpl ./deploy.sh
       - sed -i "s#{{DB_PASSWORD}}#$DB_PASSWORD#g" ./StockPOS/Deploy/docker-compose.yml
 artifacts:
   files:
