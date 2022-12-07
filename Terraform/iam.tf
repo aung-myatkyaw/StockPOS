@@ -451,3 +451,30 @@ resource "aws_iam_role" "rds_monitoring_role" {
 data "aws_iam_policy" "rds_monitoring_policy" {
   name = "AmazonRDSEnhancedMonitoringRole"
 }
+
+// Role for CodeDeploy
+resource "aws_iam_role" "codedeploy_role" {
+  name        = var.codedeploy_role_name
+  description = "Allows CodeDeploy to call AWS services such as Auto Scaling on your behalf."
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "codedeploy.amazonaws.com"
+        }
+      }
+    ]
+  })
+  tags = {
+    Name = var.codedeploy_role_name
+  }
+  managed_policy_arns = [data.aws_iam_policy.default_codedeploy_policy.arn]
+}
+
+# Get the policy by name
+data "aws_iam_policy" "default_codedeploy_policy" {
+  name = "AWSCodeDeployRole"
+}

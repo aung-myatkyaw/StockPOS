@@ -1,0 +1,23 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /opt/stockpos/
+permissions:
+  - object: /opt/stockpos/
+    owner: ubuntu
+    group: ubuntu
+    mode: 755
+hooks:
+  BeforeInstall:
+    - location: /opt/stockpos/before_install.sh
+      runas: root
+      timeout: 300
+  # AfterInstall:
+  #   - location: deploy/scripts/after_install.sh
+  #     runas: root
+  #     timeout: 300
+  ApplicationStart:
+    - location: /opt/stockpos/application_start.sh
+      runas: root
+      timeout: 300

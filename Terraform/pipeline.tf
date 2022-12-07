@@ -71,25 +71,25 @@ resource "aws_codepipeline" "stockpos_mumbai_backend_pipeline" {
     }
   }
 
-  #   //Deploying to ec2 instance with CodeDeploy
-  #   stage {
-  #     name = "Deploy"
+    //Deploying to ec2 instance with CodeDeploy
+    stage {
+      name = "Deploy"
 
-  #     action {
-  #       name            = "Deploy"
-  #       category        = "Deploy"
-  #       owner           = "AWS"
-  #       provider        = "CodeDeploy"
-  #       input_artifacts = ["BuildArtifact"]
-  #       version         = "1"
-  #       namespace       = "DeployVariables"
+      action {
+        name            = "Deploy"
+        category        = "Deploy"
+        owner           = "AWS"
+        provider        = "CodeDeploy"
+        input_artifacts = ["BuildArtifact"]
+        version         = "1"
+        namespace       = "DeployVariables"
 
-  #       configuration = {
-  #         ApplicationName     = var.codedeploy_application_name
-  #         DeploymentGroupName = aws_codedeploy_deployment_group.kms_mumbai_codedeploy_group.deployment_group_name
-  #       }
-  #     }
-  #   }
+        configuration = {
+          ApplicationName     = aws_codedeploy_app.stockpos_mumbai_codedeploy_application.name
+          DeploymentGroupName = aws_codedeploy_deployment_group.stockpos_mumbai_codedeploy_group.deployment_group_name
+        }
+      }
+    }
 }
 
 // CodeBuild Project
@@ -137,22 +137,30 @@ resource "aws_cloudwatch_log_group" "stockpos_mumbai_backend_log_group" {
   retention_in_days = 30
 }
 
-# // Deployment Group for ec2 provisioning
-# resource "aws_codedeploy_deployment_group" "kms_mumbai_codedeploy_group" {
-#   app_name              = var.codedeploy_application_name
-#   deployment_group_name = var.codedeploy_group_name
-#   service_role_arn      = data.aws_iam_role.codedeploy_role.arn
+// StockPOS Code Deploy Application For Mumbai Region
+resource "aws_codedeploy_app" "stockpos_mumbai_codedeploy_application" {
+  provider         = aws.mumbai
+  compute_platform = "Server"
+  name             = var.codedeploy_application_name
+}
 
-#   auto_rollback_configuration {
-#     enabled = true
-#     events  = ["DEPLOYMENT_FAILURE"]
-#   }
+// Deployment Group for ec2 provisioning
+resource "aws_codedeploy_deployment_group" "stockpos_mumbai_codedeploy_group" {
+  provider               = aws.mumbai
+  app_name              = aws_codedeploy_app.stockpos_mumbai_codedeploy_application.name
+  deployment_group_name = var.codedeploy_group_name
+  service_role_arn      = aws_iam_role.codedeploy_role.arn
 
-#   ec2_tag_set {
-#     ec2_tag_filter {
-#       key   = "Name"
-#       type  = "KEY_AND_VALUE"
-#       value = var.server_tag_value
-#     }
-#   }
-# }
+  auto_rollback_configuration {
+    enabled = true
+    events  = ["DEPLOYMENT_FAILURE"]
+  }
+
+  ec2_tag_set {
+    ec2_tag_filter {
+      key   = "Name"
+      type  = "KEY_AND_VALUE"
+      value = var.server_tag_value
+    }
+  }
+}

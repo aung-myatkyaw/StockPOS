@@ -2,7 +2,6 @@ version: 0.2
 
 env:
   variables:
-      # AWS_DEFAULT_REGION: "ap-southeast-1"
       ECR: "582415712618.dkr.ecr.ap-south-1.amazonaws.com"
       REPO: "stockpos-backend-mumbai"
       VERSION: "v1.0.0"
@@ -11,8 +10,6 @@ env:
       DockerHub_USERNAME: "yinko2"
       DOCKER_BUILDKIT: 1
   parameter-store:
-      DB_SERVER_URL: mysql-server-url
-      DB_PASSWORD: mysql-dbpassword
       DockerHub_PASSWORD: dockerhub-password
 phases:
   pre_build:
@@ -25,9 +22,6 @@ phases:
       - docker pull $ECR/$REPO:$LATEST || true
       - echo Docker Hub Login
       - docker login -u $DockerHub_USERNAME -p $DockerHub_PASSWORD
-      - echo Inserting MySQL URL and Password
-      - sed -i "s#{{DB_SERVER_URL}}#$DB_SERVER_URL#g" ./StockPOS/appsettings.json
-      - sed -i "s#{{DB_PASSWORD}}#$DB_PASSWORD#g" ./StockPOS/appsettings.json
   build:
     commands:
       - echo Building...
@@ -42,10 +36,12 @@ phases:
     commands:
       - echo Making File for CodeDeploy
       # - cp ./deploy/scripts/deploy.sh.tpl ./deploy.sh
-      - sed -i "/^$ENV_TAG_KEY=/c $ENV_TAG_KEY=$VERSION" .env
-      - sed -i "/^ECR=/c ECR=$ECR" .env
-      - sed -i "/^REPO=/c REPO=$REPO" .env
+      - sed -i "/^$ENV_TAG_KEY=/c $ENV_TAG_KEY=$VERSION" ./StockPOS/Deploy/.env
+      - sed -i "/^ECR=/c ECR=$ECR" ./StockPOS/Deploy/.env
+      - sed -i "/^REPO=/c REPO=$REPO" ./StockPOS/Deploy/.env
 artifacts:
   files:
     - 'StockPOS/Deploy/docker-compose.yml'
     - 'StockPOS/Deploy/.env'
+    - 'StockPOS/Deploy/*.sh'
+  discard-paths: yes

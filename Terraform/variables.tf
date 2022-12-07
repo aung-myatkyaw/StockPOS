@@ -77,3 +77,18 @@ variable "backend_pipeline_name" {
   description = "Backend Pipeline Name"
   default     = "stockpos-backend-mumbai"
 }
+
+variable "codedeploy_application_name" {
+  description = "Codedeploy Application Name"
+  default     = "StockPOS-CodeDeploy-Application-Mumbai"
+}
+
+variable "codedeploy_group_name" {
+  description = "Codedeploy Group Name"
+  default     = "staging"
+}
+
+variable "codedeploy_role_name" {
+  description = "Role for CodeDeploy"
+  default     = "CodeDeployRole"
+}

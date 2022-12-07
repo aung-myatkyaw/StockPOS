@@ -1,14 +1,14 @@
 version: "3"
 services:
-  dotnet:
+  backend:
     container_name: stockpos-backend
     image: ${ECR}/${REPO}:${STOCKPOS_BACKEND_TAG:-latest}
     restart: always
     # depends_on:
     #   - db
     environment:
-      MysqlDbSettings:Host: stockpos.cvripyq2dopz.ap-south-1.rds.amazonaws.com
-      MysqlDbSettings:Password: aJSL--!-1C1q
+      MysqlDbSettings:Host: ${DB_SERVER_URL}
+      MysqlDbSettings:Password: ${DB_PASSWORD}
     ports:
       - 80:80
     networks:
