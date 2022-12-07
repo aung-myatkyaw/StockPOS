@@ -424,3 +424,30 @@ resource "aws_iam_policy" "codepipeline_policy" {
 
   policy = file("pipeline-policy.json")
 }
+
+// Role for RDS Monitoring
+resource "aws_iam_role" "rds_monitoring_role" {
+  name = "rds-monitoring-role"
+  assume_role_policy = jsonencode(
+    {
+      Statement = [
+        {
+          Action = "sts:AssumeRole"
+          Effect = "Allow"
+          Principal = {
+            Service = "monitoring.rds.amazonaws.com"
+          }
+        },
+      ]
+      Version = "2012-10-17"
+    }
+  )
+  managed_policy_arns = [
+    data.aws_iam_policy.rds_monitoring_policy.arn
+  ]
+}
+
+# Get the policy by name
+data "aws_iam_policy" "rds_monitoring_policy" {
+  name = "AmazonRDSEnhancedMonitoringRole"
+}

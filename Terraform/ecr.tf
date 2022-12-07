@@ -1,6 +1,7 @@
 resource "aws_ecr_repository" "stockpos_backend" {
+  provider             = aws.mumbai
   image_tag_mutability = "MUTABLE"
-  name                 = "stockpos-backend"
+  name                 = "stockpos-backend-mumbai"
 
   image_scanning_configuration {
     scan_on_push = false
@@ -8,6 +9,7 @@ resource "aws_ecr_repository" "stockpos_backend" {
 }
 
 resource "aws_ecr_lifecycle_policy" "stockpos_backend_lifecycle_policy" {
+  provider   = aws.mumbai
   repository = aws_ecr_repository.stockpos_backend.name
   policy = jsonencode(
     {

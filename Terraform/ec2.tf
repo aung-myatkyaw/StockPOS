@@ -88,86 +88,84 @@ resource "aws_s3_object" "stockpos_mumbai_staging_ssh_private_key" {
   }
 }
 
-resource "aws_spot_fleet_request" "stockpos_mumbai_staging_fleet_request" {
-  provider                            = aws.mumbai
-  allocation_strategy                 = "lowestPrice"
-  excess_capacity_termination_policy  = "Default"
-  fleet_type                          = "maintain"
-  iam_fleet_role                      = aws_iam_role.ec2_spot_fleet_tagging.arn
-  instance_interruption_behaviour     = "terminate"
-  instance_pools_to_use_count         = 1
-  on_demand_allocation_strategy       = "lowestPrice"
-  on_demand_target_capacity           = 0
-  replace_unhealthy_instances         = true
-  target_capacity                     = 1
-  terminate_instances_with_expiration = true
-  wait_for_fulfillment                = true
+# resource "aws_spot_fleet_request" "stockpos_mumbai_staging_fleet_request" {
+#   provider                            = aws.mumbai
+#   allocation_strategy                 = "lowestPrice"
+#   excess_capacity_termination_policy  = "Default"
+#   fleet_type                          = "maintain"
+#   iam_fleet_role                      = aws_iam_role.ec2_spot_fleet_tagging.arn
+#   instance_interruption_behaviour     = "terminate"
+#   instance_pools_to_use_count         = 1
+#   on_demand_allocation_strategy       = "lowestPrice"
+#   on_demand_target_capacity           = 0
+#   replace_unhealthy_instances         = true
+#   target_capacity                     = 1
+#   terminate_instances_with_expiration = true
+#   wait_for_fulfillment                = true
 
-  depends_on = [
-    aws_eip.stockpos_mumbai_ip
-  ]
+#   depends_on = [
+#     aws_eip.stockpos_mumbai_ip
+#   ]
 
-  spot_maintenance_strategies {
-    capacity_rebalance {
-      replacement_strategy = "launch"
-    }
+#   spot_maintenance_strategies {
+#     capacity_rebalance {
+#       replacement_strategy = "launch"
+#     }
+#   }
+
+#   launch_template_config {
+#     launch_template_specification {
+#       id      = aws_launch_template.stockpos_mumbai_template.id
+#       version = "$Default"
+#     }
+
+#     dynamic "overrides" {
+#       for_each = var.staging_spot_instance_types
+#       content {
+#         instance_type = overrides.value
+#         subnet_id     = aws_subnet.mumbai_public_subnets[0].id
+#       }
+#     }
+
+#     dynamic "overrides" {
+#       for_each = var.staging_spot_instance_types
+#       content {
+#         instance_type = overrides.value
+#         subnet_id     = aws_subnet.mumbai_public_subnets[1].id
+#       }
+#     }
+
+#     dynamic "overrides" {
+#       for_each = var.staging_spot_instance_types
+#       content {
+#         instance_type = overrides.value
+#         subnet_id     = aws_subnet.mumbai_public_subnets[2].id
+#       }
+#     }
+#   }
+# }
+
+resource "aws_instance" "stockpos_mumbai_staging" {
+  provider = aws.mumbai
+  # disable_api_termination = true
+  launch_template {
+    id      = aws_launch_template.stockpos_mumbai_template.id
+    version = "$Default"
   }
-
-  launch_template_config {
-    launch_template_specification {
-      id      = aws_launch_template.stockpos_mumbai_template.id
-      version = "$Default"
-    }
-
-    dynamic "overrides" {
-      for_each = var.staging_spot_instance_types
-      content {
-        instance_type = overrides.value
-        subnet_id     = aws_subnet.mumbai_public_subnets[0].id
-      }
-    }
-
-    dynamic "overrides" {
-      for_each = var.staging_spot_instance_types
-      content {
-        instance_type = overrides.value
-        subnet_id     = aws_subnet.mumbai_public_subnets[1].id
-      }
-    }
-
-    dynamic "overrides" {
-      for_each = var.staging_spot_instance_types
-      content {
-        instance_type = overrides.value
-        subnet_id     = aws_subnet.mumbai_public_subnets[2].id
-      }
-    }
+  instance_type = "t4g.small"
+  subnet_id     = random_shuffle.subnet_for_stockpos.result[0]
+  tags = {
+    "Name" = var.server_tag_value
+  }
+  lifecycle {
+    ignore_changes = [ami, user_data, launch_template]
   }
 }
-
-# data "aws_instance" "stockpos_mumbai_staging" {
-#   filter {
-#     name   = "instance-lifecycle"
-#     values = ["spot"]
-#   }
-
-#   filter {
-#     name   = "tag:Name"
-#     values = [var.server_tag_value]
-#   }
-
-#   filter {
-#     name   = "instance-state-name"
-#     values = ["running"]
-#   }
-
-#   depends_on = [aws_spot_fleet_request.stockpos_mumbai_staging_fleet_request]
-# }
 
 # Elastic IP for StockPOS mumbai Staging
 resource "aws_eip" "stockpos_mumbai_ip" {
   provider = aws.mumbai
-  # instance = data.aws_instance.stockpos_mumbai_staging.id
+  instance = aws_instance.stockpos_mumbai_staging.id
   tags = {
     "Name" = var.server_tag_value
   }
@@ -202,13 +200,6 @@ resource "aws_security_group" "stockpos_mumbai_sg" {
     ipv6_cidr_blocks = ["::/0"]
     protocol         = "tcp"
     to_port          = 80
-  }
-  ingress {
-    cidr_blocks      = ["0.0.0.0/0"]
-    from_port        = 3306
-    ipv6_cidr_blocks = ["::/0"]
-    protocol         = "tcp"
-    to_port          = 3306
   }
   egress {
     cidr_blocks = ["0.0.0.0/0"]
@@ -257,9 +248,9 @@ resource "aws_ssm_maintenance_window_target" "stockpos_mumbai_target" {
   name          = var.server_tag_value
   resource_type = "INSTANCE"
 
-  depends_on = [
-    aws_spot_fleet_request.stockpos_mumbai_staging_fleet_request
-  ]
+  # depends_on = [
+  #   aws_spot_fleet_request.stockpos_mumbai_staging_fleet_request
+  # ]
 
   targets {
     key = "tag:Name"

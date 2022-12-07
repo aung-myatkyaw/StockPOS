@@ -19,7 +19,7 @@ variable "mumbai_pipeline_bucket_name" {
 
 variable "server_tag_value" {
   description = "Tag Value for server"
-  default     = "StockPOS"
+  default     = "stockpos"
 }
 
 variable "staging_ec2_key_name" {

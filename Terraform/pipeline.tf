@@ -3,9 +3,9 @@ resource "aws_codepipeline" "stockpos_mumbai_backend_pipeline" {
   provider = aws.mumbai
   name     = var.backend_pipeline_name
 
-  depends_on = [
-    aws_spot_fleet_request.stockpos_mumbai_staging_fleet_request
-  ]
+  # depends_on = [
+  #   aws_spot_fleet_request.stockpos_mumbai_staging_fleet_request
+  # ]
 
   artifact_store {
     location = aws_s3_bucket.codepipeline_bucket_mumbai.bucket
