@@ -28,6 +28,9 @@ docker compose -p $DEPLOYMENT_GROUP_NAME -f /opt/stockpos/docker-compose.yml up 
 docker container prune -f
 
 # Try to remove the Old Image
+
+echo `Old Image in applicationStart: $OLD_IMAGE`
+
 [ ! -z "$OLD_IMAGE" ] && docker rmi $ECR/$REPO:$OLD_IMAGE || true
 
 # Clean Up the Dangling Images
