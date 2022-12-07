@@ -4,7 +4,7 @@ env:
   variables:
       ECR: "582415712618.dkr.ecr.ap-south-1.amazonaws.com"
       REPO: "stockpos-backend-mumbai"
-      VERSION: "v1.0.0"
+      VERSION: "v1.0.1"
       LATEST: "latest"
       ENV_TAG_KEY: "STOCKPOS_BACKEND_TAG"
       DockerHub_USERNAME: "yinko2"

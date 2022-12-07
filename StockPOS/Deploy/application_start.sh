@@ -10,16 +10,16 @@ export TAG=`/usr/bin/curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.25
 
 export ASSOCIATED_ID=`aws ec2 describe-addresses --output text --region $REGION --query 'Addresses[*].InstanceId' --filters Name="tag:Name",Values="$TAG"`
 
-source .env
+source /opt/stockpos/.env
 # Login ECR
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ECR
-
-# Pull the new image
-docker compose -p $DEPLOYMENT_GROUP_NAME -f /opt/stockpos/docker-compose.yml pull
 
 # Get the parameters
 export DB_SERVER_URL=`aws ssm get-parameter --name mysql-server-url --with-decryption --query 'Parameter.Value' --output text`
 export DB_PASSWORD=`aws ssm get-parameter --name mysql-dbpassword --with-decryption --query 'Parameter.Value' --output text`
+
+# Pull the new image
+docker compose -p $DEPLOYMENT_GROUP_NAME -f /opt/stockpos/docker-compose.yml pull
 
 # Recreate the containers with new image
 docker compose -p $DEPLOYMENT_GROUP_NAME -f /opt/stockpos/docker-compose.yml up -d --force-recreate
