@@ -44,4 +44,5 @@ artifacts:
     - 'StockPOS/Deploy/docker-compose.yml'
     - 'StockPOS/Deploy/.env'
     - 'StockPOS/Deploy/*.sh'
+    - 'appspec.yml'
   discard-paths: yes
