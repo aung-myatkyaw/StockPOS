@@ -9,15 +9,15 @@ permissions:
     group: ubuntu
     mode: 755
 hooks:
-  BeforeInstall:
-    - location: /opt/stockpos/before_install.sh
+  AfterInstall:
+    - location: after_install.sh
       runas: root
       timeout: 300
-  # AfterInstall:
+  # BeforeInstall:
   #   - location: deploy/scripts/after_install.sh
   #     runas: root
   #     timeout: 300
   ApplicationStart:
-    - location: /opt/stockpos/application_start.sh
+    - location: application_start.sh
       runas: root
       timeout: 300
