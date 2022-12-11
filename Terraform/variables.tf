@@ -92,3 +92,9 @@ variable "codedeploy_role_name" {
   description = "Role for CodeDeploy"
   default     = "CodeDeployRole"
 }
+
+variable "mumbai_subscription_emails" {
+  description = "Create Topic Subscriptions with these emails for mumbai region"
+  type        = list(string)
+  default     = ["aungmyatkyaw.kk@gmail.com"]
+}

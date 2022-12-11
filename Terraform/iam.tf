@@ -478,3 +478,100 @@ resource "aws_iam_role" "codedeploy_role" {
 data "aws_iam_policy" "default_codedeploy_policy" {
   name = "AWSCodeDeployRole"
 }
+
+# Role for Lambda Function of processing SNS noti for spot instance changes
+resource "aws_iam_role" "lambda_process_sns_role" {
+  name = "SNS-Publish-For-Lambda"
+  path = "/service-role/"
+  assume_role_policy = jsonencode(
+    {
+      Statement = [
+        {
+          Action = "sts:AssumeRole"
+          Effect = "Allow"
+          Principal = {
+            Service = "lambda.amazonaws.com"
+          }
+        },
+      ]
+      Version = "2012-10-17"
+    }
+  )
+  managed_policy_arns = [
+    aws_iam_policy.lambda_sns_process_policy.arn,
+    aws_iam_policy.lambda_logs_policy.arn,
+    aws_iam_policy.lambda_sns_publish_policy.arn
+  ]
+}
+
+resource "aws_iam_policy" "lambda_sns_process_policy" {
+  name = "Lambda-SNS-Process-Policy"
+  policy = jsonencode(
+    {
+      Statement = [
+        {
+          Action   = "ec2:DescribeTags"
+          Effect   = "Allow"
+          Resource = "*"
+        },
+        {
+          Action   = "ssm:GetParameter"
+          Effect   = "Allow"
+          Resource = "*"
+        }
+      ]
+      Version = "2012-10-17"
+    }
+  )
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_iam_policy" "lambda_logs_policy" {
+  name = "Lambda-Logging-Policy"
+  path = "/service-role/"
+  policy = jsonencode(
+    {
+      Statement = [
+        {
+          Action = [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+          ]
+          Effect = "Allow"
+          Resource = [
+            "*",
+          ]
+        }
+      ]
+      Version = "2012-10-17"
+    }
+  )
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_iam_policy" "lambda_sns_publish_policy" {
+  name = "Lambda-SNS-Publish-Policy"
+  path = "/service-role/"
+  policy = jsonencode(
+    {
+      Statement = [
+        {
+          Action = [
+            "sns:Publish",
+          ]
+          Effect   = "Allow"
+          Resource = "arn:aws:sns:*:*:*"
+        },
+      ]
+      Version = "2012-10-17"
+    }
+  )
+  lifecycle {
+    create_before_destroy = true
+  }
+}

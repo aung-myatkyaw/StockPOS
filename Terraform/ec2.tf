@@ -209,25 +209,25 @@ resource "aws_security_group" "stockpos_mumbai_sg" {
   }
 }
 
-# resource "aws_ssm_association" "stockpos_staging_cloud_watch_update" {
-#   provider = aws.mumbai
-#   association_name            = "Cloud_Watch_Agent_For_stockpos_Staging"
-#   apply_only_at_cron_interval = true
-#   name                        = "AWS-ConfigureAWSPackage"
-#   parameters = {
-#     "action"           = "Install"
-#     "installationType" = "Uninstall and reinstall"
-#     "name"             = "AmazonCloudWatchAgent"
-#   }
-#   schedule_expression = "cron(0 22 ? * SUN *)"
+resource "aws_ssm_association" "stockpos_staging_cloud_watch_update" {
+  provider                    = aws.mumbai
+  association_name            = "Cloud_Watch_Agent_For_StockPos_Staging"
+  apply_only_at_cron_interval = true
+  name                        = "AWS-ConfigureAWSPackage"
+  parameters = {
+    "action"           = "Install"
+    "installationType" = "Uninstall and reinstall"
+    "name"             = "AmazonCloudWatchAgent"
+  }
+  schedule_expression = "cron(0 23 ? * SUN *)"
 
-#   targets {
-#     key = "tag:Name"
-#     values = [
-#       var.server_tag_value
-#     ]
-#   }
-# }
+  targets {
+    key = "tag:Name"
+    values = [
+      var.server_tag_value
+    ]
+  }
+}
 
 resource "aws_ssm_maintenance_window" "stockpos_mumbai_maintenace_window" {
   provider                   = aws.mumbai

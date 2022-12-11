@@ -42,8 +42,8 @@ resource "aws_codepipeline" "stockpos_mumbai_backend_pipeline" {
     action {
       category = "Approval"
       configuration = {
-        "CustomData" = "Please approve this change. Commit Id: #{SourceVariables.CommitId}, Trigger Branch: #{SourceVariables.BranchName}, Commit message: #{SourceVariables.CommitMessage}"
-        # "NotificationArn" = data.aws_sns_topic.pipeline_notification_topic.arn
+        "CustomData"      = "Please approve this change. Commit Id: #{SourceVariables.CommitId}, Trigger Branch: #{SourceVariables.BranchName}, Commit message: #{SourceVariables.CommitMessage}"
+        "NotificationArn" = aws_sns_topic.mumbai_notification_topic.arn
       }
       name     = "Approval"
       owner    = "AWS"
