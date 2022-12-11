@@ -29,7 +29,7 @@ docker container prune -f
 
 # Try to remove the Old Image
 
-echo `Old Image in applicationStart: $OLD_IMAGE`
+echo Old Image applicationStart: $OLD_IMAGE
 
 [ ! -z "$OLD_IMAGE" ] && docker rmi $ECR/$REPO:$OLD_IMAGE || true
 
