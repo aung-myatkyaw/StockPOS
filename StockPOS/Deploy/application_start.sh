@@ -29,6 +29,10 @@ docker container prune -f
 
 # Try to remove the Old Image
 
+pwd
+
+export OLD_IMAGE=`cat old_image`
+
 echo Old Image applicationStart: $OLD_IMAGE
 
 [ ! -z "$OLD_IMAGE" ] && docker rmi $ECR/$REPO:$OLD_IMAGE || true
@@ -38,6 +42,8 @@ docker image prune -f
 
 # Clean Up the Old Volumes
 docker volume prune -f
+
+rm -f old_image
 
 if [ "$INSTANCE_ID" != "$ASSOCIATED_ID" ]
 then

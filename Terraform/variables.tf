@@ -85,7 +85,7 @@ variable "codedeploy_application_name" {
 
 variable "codedeploy_group_name" {
   description = "Codedeploy Group Name"
-  default     = "staging"
+  default     = "production"
 }
 
 variable "codedeploy_role_name" {
