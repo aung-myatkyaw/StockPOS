@@ -9,7 +9,7 @@ permissions:
     group: ubuntu
     mode: 755
 hooks:
-  BeforeInsall:
+  BeforeInstall:
     - location: before_install.sh
       runas: root
       timeout: 300
