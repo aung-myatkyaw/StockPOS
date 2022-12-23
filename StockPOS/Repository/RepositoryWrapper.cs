@@ -77,7 +77,21 @@ namespace StockPOS.Repository
                 return oProductcategory;
             }
         }
-//////Template Place Holder/////
+
+        private ICustomerRepository oCustomer;
+        public ICustomerRepository Customer
+        {
+            get
+            {
+                if (oCustomer == null)
+                {
+                    oCustomer = new CustomerRepository(_repoContext);
+                }
+
+                return oCustomer;
+            }
+        }
+        //////Template Place Holder/////
 
 
         public RepositoryWrapper(StockPOSContext repositoryContext)
