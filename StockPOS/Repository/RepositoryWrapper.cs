@@ -105,6 +105,20 @@ namespace StockPOS.Repository
                 return ochangedpricelog;
             }
         }
+
+        private IDebtbalanceRepository odebtbalance;
+        public IDebtbalanceRepository Debtbalance
+        {
+            get
+            {
+                if (odebtbalance == null)
+                {
+                    odebtbalance = new DebtbalanceRepository(_repoContext);
+                }
+
+                return odebtbalance;
+            }
+        }
         //////Template Place Holder/////
 
 
