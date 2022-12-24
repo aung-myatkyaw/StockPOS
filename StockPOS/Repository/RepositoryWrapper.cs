@@ -91,6 +91,20 @@ namespace StockPOS.Repository
                 return oCustomer;
             }
         }
+
+        private IChangedpricelogRepository ochangedpricelog;
+        public IChangedpricelogRepository Changedpricelog
+        {
+            get
+            {
+                if (ochangedpricelog == null)
+                {
+                    ochangedpricelog = new ChangedpricelogRepository(_repoContext);
+                }
+
+                return ochangedpricelog;
+            }
+        }
         //////Template Place Holder/////
 
 

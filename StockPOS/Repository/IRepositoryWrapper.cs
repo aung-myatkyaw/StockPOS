@@ -17,6 +17,8 @@ namespace StockPOS.Repository
         IProductcategoryRepository Productcategory { get; }
 
         ICustomerRepository Customer { get; }
+
+        IChangedpricelogRepository Changedpricelog { get; }
         //////Template Place Holder/////
     }
 }
