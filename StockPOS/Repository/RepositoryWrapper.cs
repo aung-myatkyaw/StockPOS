@@ -119,6 +119,34 @@ namespace StockPOS.Repository
                 return odebtbalance;
             }
         }
+
+        private IProductbrandRepository oproductbrand;
+        public IProductbrandRepository Productbrand
+        {
+            get
+            {
+                if (oproductbrand == null)
+                {
+                    oproductbrand = new ProductbrandRepository(_repoContext);
+                }
+
+                return oproductbrand;
+            }
+        }
+
+        private IProductSizeRepository oProductsize;
+        public IProductSizeRepository Productsize
+        {
+            get
+            {
+                if (oProductsize == null)
+                {
+                    oProductsize = new ProductSizeRepository(_repoContext);
+                }
+
+                return oProductsize;
+            }
+        }
         //////Template Place Holder/////
 
 

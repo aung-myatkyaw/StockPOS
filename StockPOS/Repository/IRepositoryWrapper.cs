@@ -21,6 +21,10 @@ namespace StockPOS.Repository
         IChangedpricelogRepository Changedpricelog { get; }
 
         IDebtbalanceRepository Debtbalance { get; }
+
+        IProductbrandRepository Productbrand { get; }
         //////Template Place Holder/////
+        
+        IProductSizeRepository Productsize { get; }
     }
 }
