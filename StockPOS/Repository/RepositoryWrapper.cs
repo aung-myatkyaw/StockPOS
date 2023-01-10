@@ -175,6 +175,20 @@ namespace StockPOS.Repository
                 return oGroupvillage;
             }
         }
+        
+        private ISearchedcountRepository oSearchedcount;
+        public ISearchedcountRepository Searchedcount
+        {
+            get
+            {
+                if (oSearchedcount == null)
+                {
+                    oSearchedcount = new SearchedcountRepository(_repoContext);
+                }
+
+                return oSearchedcount;
+            }
+        }
         //////Template Place Holder/////
 
 
