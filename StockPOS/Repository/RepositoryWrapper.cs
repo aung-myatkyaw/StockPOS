@@ -217,6 +217,20 @@ namespace StockPOS.Repository
                 return oVillage;
             }
         }
+
+        private IWarehouseRepository oWarehouse;
+        public IWarehouseRepository Warehouse
+        {
+            get
+            {
+                if (oWarehouse == null)
+                {
+                    oWarehouse = new WarehouseRepository(_repoContext);
+                }
+
+                return oWarehouse;
+            }
+        }
         //////Template Place Holder////
 
 

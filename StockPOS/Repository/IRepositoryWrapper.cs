@@ -36,5 +36,7 @@ namespace StockPOS.Repository
         IUsertypeRepository Usertype { get; }
 
         IVillageRepository Village { get; }
+
+        IWarehouseRepository Warehouse { get; }
     }
 }
