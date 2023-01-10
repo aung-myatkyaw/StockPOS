@@ -147,6 +147,20 @@ namespace StockPOS.Repository
                 return oProductsize;
             }
         }
+
+        private IProducttypeRepository oProducttype;
+        public IProducttypeRepository Producttype
+        {
+            get
+            {
+                if (oProducttype == null)
+                {
+                    oProducttype = new ProducttypeRepository(_repoContext);
+                }
+
+                return oProducttype;
+            }
+        }
         //////Template Place Holder/////
 
 
