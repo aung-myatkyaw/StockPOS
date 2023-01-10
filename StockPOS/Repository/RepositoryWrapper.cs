@@ -203,6 +203,20 @@ namespace StockPOS.Repository
                 return oUsertype;
             }
         }
+
+        private IVillageRepository oVillage;
+        public IVillageRepository Village
+        {
+            get
+            {
+                if (oVillage == null)
+                {
+                    oVillage = new VillageRepository(_repoContext);
+                }
+
+                return oVillage;
+            }
+        }
         //////Template Place Holder////
 
 

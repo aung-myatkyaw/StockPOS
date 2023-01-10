@@ -34,5 +34,7 @@ namespace StockPOS.Repository
         ISearchedcountRepository Searchedcount { get; }
 
         IUsertypeRepository Usertype { get; }
+
+        IVillageRepository Village { get; }
     }
 }
