@@ -26,5 +26,7 @@ namespace StockPOS.Repository
         //////Template Place Holder/////
         
         IProductSizeRepository Productsize { get; }
+
+        IProducttypeRepository Producttype { get; }
     }
 }

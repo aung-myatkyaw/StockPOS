@@ -12,62 +12,62 @@ namespace StockPOS.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductsizesController : BaseController
+    public class ProducttypesController : BaseController
     {
-        public ProductsizesController(IRepositoryWrapper repositoryWrapper, IConfiguration configuration) : base(repositoryWrapper, configuration)
+        public ProducttypesController(IRepositoryWrapper repositoryWrapper, IConfiguration configuration) : base(repositoryWrapper, configuration)
         {
         }
 
-        // GET: api/Productsizes
+        // GET: api/GetProducttypes
         [HttpGet]
-        public async Task<ActionResult<dynamic>> GetProductsizes()
+        public async Task<ActionResult<dynamic>> GetProducttypes()
         {
             try
             {
-                var Productsizelist = await _repositoryWrapper.Productsize.FindAllAsync();
-                return Ok(new { status = "success", data = Productsizelist });
+                var Producttypelist = await _repositoryWrapper.Producttype.FindAllAsync();
+                return Ok(new { status = "success", data = Producttypelist });
             }
             catch (Exception ex)
             {
-                await _repositoryWrapper.Eventlog.Error("get ProductsizesList fail", ex.Message);
+                await _repositoryWrapper.Eventlog.Error("get ProducttypesList fail", ex.Message);
                 return BadRequest(new { status = "fail", data = "Something went wrong." });
             }
         }
 
-        // GET: api/Productsize/5
+        // GET: api/Producttypes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Productsize>> GetProductsize(int id)
+        public async Task<ActionResult<Producttype>> GetProducttype(int id)
         {
-            var Productsize = await _repositoryWrapper.Productsize.FindByIDAsync(id);
+            var Producttype = await _repositoryWrapper.Producttype.FindByIDAsync(id);
 
-            if (Productsize == null)
+            if (Producttype == null)
             {
                 return NotFound(new { status = "fail", data = "Data Not Found." });
             }
 
-            return Ok(new { status = "success", data = Productsize });
+            return Ok(new { status = "success", data = Producttype });
         }
 
-        // PUT: api/Productsize/5
+        // PUT: api/Producttypes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProductsize(int id, Productsize Productsize)
+        public async Task<IActionResult> PutProducttype(string id, Producttype producttype)
         {
-            if (id != Productsize.ProductSizeId)
+            if (id != producttype.ProductTypeId)
             {
                 return BadRequest(new { status = "fail", data = "Bad Parameters." });
             }
 
             try
             {
-                await _repositoryWrapper.Productsize.UpdateAsync(Productsize);
-                await _repositoryWrapper.Eventlog.Update(Productsize);
+                await _repositoryWrapper.Producttype.UpdateAsync(producttype);
+                await _repositoryWrapper.Eventlog.Update(producttype);
 
                 return Ok(new { status = "success", data = "Updated" });
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await ProductsizeExists(id))
+                if (!await ProducttypeExists(id))
                 {
                     return NotFound(new { status = "fail", data = "Data Not Found." });
                 }
@@ -83,21 +83,21 @@ namespace StockPOS.Controllers
             }
         }
 
-        // POST: api/Productsize
+        // POST: api/Producttypes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Productsize>> PostProductsize(Productsize Productsize)
+        public async Task<ActionResult<Producttype>> PostProducttype(Producttype producttype)
         {
             try
             {
-                await _repositoryWrapper.Productsize.CreateAsync(Productsize);
-                await _repositoryWrapper.Eventlog.Insert(Productsize);
+                await _repositoryWrapper.Producttype.CreateAsync(producttype);
+                await _repositoryWrapper.Eventlog.Insert(producttype);
 
-                return CreatedAtAction(nameof(GetProductsize), new { id = Productsize.ProductSizeId }, new { status = "success", data = Productsize });
+                return CreatedAtAction(nameof(GetProducttype), new { id = producttype.ProductTypeId }, new { status = "success", data = producttype });
             }
             catch (DbUpdateException)
             {
-                if (await ProductsizeExists(Productsize.ProductSizeId))
+                if (await ProducttypeExists(producttype.ProductTypeId))
                 {
                     return Conflict(new { status = "fail", data = "Data Already Exist." });
                 }
@@ -113,20 +113,20 @@ namespace StockPOS.Controllers
             }
         }
 
-        // DELETE: api/Productsize/5
+        // DELETE: api/Producttypes/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProductsize(int id)
+        public async Task<IActionResult> DeleteProducttype(int id)
         {
             try
             {
-                var Productsize = await _repositoryWrapper.Productsize.FindByIDAsync(id);
-                if (Productsize == null)
+                var Producttype = await _repositoryWrapper.Producttype.FindByIDAsync(id);
+                if (Producttype == null)
                 {
                     return NotFound(new { status = "fail", data = "Data Not Found." });
                 }
 
-                await _repositoryWrapper.Productsize.DeleteAsync(Productsize);
-                await _repositoryWrapper.Eventlog.Delete(Productsize);
+                await _repositoryWrapper.Producttype.DeleteAsync(Producttype);
+                await _repositoryWrapper.Eventlog.Delete(Producttype);
 
                 return Ok(new { status = "success", data = "Deleted" });
             }
@@ -137,9 +137,9 @@ namespace StockPOS.Controllers
             }
         }
 
-        private async Task<bool> ProductsizeExists(int id)
+        private async Task<bool> ProducttypeExists(string id)
         {
-            return await _repositoryWrapper.Productsize.IsExist(id);
+            return await _repositoryWrapper.Producttype.IsExist(id);
         }
     }
 }
