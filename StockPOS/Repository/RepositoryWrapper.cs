@@ -189,7 +189,21 @@ namespace StockPOS.Repository
                 return oSearchedcount;
             }
         }
-        //////Template Place Holder/////
+
+        private IUsertypeRepository oUsertype;
+        public IUsertypeRepository Usertype
+        {
+            get
+            {
+                if (oUsertype == null)
+                {
+                    oUsertype = new UsertypeRepository(_repoContext);
+                }
+
+                return oUsertype;
+            }
+        }
+        //////Template Place Holder////
 
 
         public RepositoryWrapper(StockPOSContext repositoryContext)
