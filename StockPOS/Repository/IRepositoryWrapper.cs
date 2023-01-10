@@ -28,5 +28,7 @@ namespace StockPOS.Repository
         IProductSizeRepository Productsize { get; }
 
         IProducttypeRepository Producttype { get; }
+
+        IGroupvillageRepository Groupvillage { get;  }
     }
 }

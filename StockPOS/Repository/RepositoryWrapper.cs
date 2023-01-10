@@ -161,6 +161,20 @@ namespace StockPOS.Repository
                 return oProducttype;
             }
         }
+        
+         private IGroupvillageRepository oGroupvillage;
+        public IGroupvillageRepository Groupvillage
+        {
+            get
+            {
+                if (oGroupvillage == null)
+                {
+                    oGroupvillage = new GroupvillageRepository(_repoContext);
+                }
+
+                return oGroupvillage;
+            }
+        }
         //////Template Place Holder/////
 
 
