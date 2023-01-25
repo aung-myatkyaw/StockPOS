@@ -3,6 +3,7 @@ os: linux
 files:
   - source: /
     destination: /opt/stockpos/
+file_exists_behavior: OVERWRITE
 permissions:
   - object: /opt/stockpos/
     owner: ubuntu

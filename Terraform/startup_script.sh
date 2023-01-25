@@ -60,7 +60,7 @@ if [ -d "$DIR" ]; then
     export REPO=`aws ssm get-parameter --name stockpos-ecr-url --with-decryption --query 'Parameter.Value' --output text`
 
     # Login ECR
-    aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ECR
+    aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $REPO
 
     sed -i "/^REPO=/c REPO=$REPO" $WORKDIR/.env
 
