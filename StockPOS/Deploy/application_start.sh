@@ -10,13 +10,16 @@ export TAG=`/usr/bin/curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.25
 
 export ASSOCIATED_ID=`aws ec2 describe-addresses --output text --region $REGION --query 'Addresses[*].InstanceId' --filters Name="tag:Name",Values="$TAG"`
 
-source /opt/stockpos/.env
-# Login ECR
-aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ECR
+# source /opt/stockpos/.env
 
 # Get the parameters
 export DB_SERVER_URL=`aws ssm get-parameter --name mysql-server-url --with-decryption --query 'Parameter.Value' --output text`
+export DB_USERNAME=`aws ssm get-parameter --name mysql-dbusername --with-decryption --query 'Parameter.Value' --output text`
 export DB_PASSWORD=`aws ssm get-parameter --name mysql-dbpassword --with-decryption --query 'Parameter.Value' --output text`
+export REPO=`aws ssm get-parameter --name stockpos-ecr-url --with-decryption --query 'Parameter.Value' --output text`
+
+# Login ECR
+aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $REPO
 
 # Pull the new image
 docker compose -p $DEPLOYMENT_GROUP_NAME -f /opt/stockpos/docker-compose.yml pull
@@ -33,7 +36,7 @@ export OLD_IMAGE=`cat /home/ubuntu/old_image.txt`
 
 echo Old Image applicationStart: $OLD_IMAGE
 
-[ ! -z "$OLD_IMAGE" ] && docker rmi $ECR/$REPO:$OLD_IMAGE || true
+[ ! -z "$OLD_IMAGE" ] && docker rmi $REPO:$OLD_IMAGE || true
 
 # Clean Up the Dangling Images
 docker image prune -f

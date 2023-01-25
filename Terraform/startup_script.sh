@@ -1,7 +1,6 @@
 #!/bin/bash
 
-export ENVIRONMENT=staging
-export MOBILE_ENV=staging-mobile
+export CONFIG_BUCKET="{{Config-Bucket-Name}}"
 
 # install docker
 curl -fsSL https://get.docker.com -o get-docker.sh
@@ -9,14 +8,17 @@ sh get-docker.sh
 usermod -aG docker ubuntu
 
 # install cloudwatch agent and apply configuration from ssm parameter store
-wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/arm64/latest/amazon-cloudwatch-agent.deb
+# wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/arm64/latest/amazon-cloudwatch-agent.deb # For ARM
+wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb # For AMD
+
 sudo dpkg -i -E ./amazon-cloudwatch-agent.deb
 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c ssm:AmazonCloudWatch-agent-config
 
 # install aws cli
 apt-get update
 apt-get install -y unzip
-curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+# curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip" # For ARM
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" # For AMD
 unzip awscliv2.zip
 ./aws/install
 
@@ -37,7 +39,7 @@ wget https://aws-codedeploy-$REGION.s3.$REGION.amazonaws.com/latest/install
 chmod +x ./install
 ./install auto
 
-aws s3 cp --recursive s3://config-files-amk-152/github-ssh/ ~/.ssh/ && chmod 400 ~/.ssh/id*
+aws s3 cp --recursive s3://$CONFIG_BUCKET/github-ssh/ ~/.ssh/ && chmod 400 ~/.ssh/id*
 
 ssh-keyscan -t ed25519 github.com > ~/.ssh/known_hosts
 
@@ -49,23 +51,21 @@ if [ -d "$DIR" ]; then
     # Take action if $DIR exists. #
     mkdir -p $WORKDIR/ && cp $DIR/StockPOS/Deploy/.env $DIR/StockPOS/Deploy/docker-compose.yml -t $WORKDIR/
 
-    source $WORKDIR/.env
-    # Login ECR
-    aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ECR
+    # source $WORKDIR/.env
 
     # Get the parameters
     export DB_SERVER_URL=`aws ssm get-parameter --name mysql-server-url --with-decryption --query 'Parameter.Value' --output text`
+    export DB_USERNAME=`aws ssm get-parameter --name mysql-dbusername --with-decryption --query 'Parameter.Value' --output text`
     export DB_PASSWORD=`aws ssm get-parameter --name mysql-dbpassword --with-decryption --query 'Parameter.Value' --output text`
+    export REPO=`aws ssm get-parameter --name stockpos-ecr-url --with-decryption --query 'Parameter.Value' --output text`
+
+    # Login ECR
+    aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ECR
+
+    sed -i "/^REPO=/c REPO=$REPO" $WORKDIR/.env
 
     # Recreate the containers with new image
     docker compose -p production -f $WORKDIR/docker-compose.yml --env-file $WORKDIR/.env up -d --force-recreate
-
-    # # Folder for scripts
-    # export SCRIPTS_DIR=/opt/optimus/operation/scripts
-
-    # # Configure cronjobs
-    # mkdir -p $SCRIPTS_DIR/log && rm -rf $SCRIPTS_DIR/*.sh && cp -rf $DIR/deploy/cron/$ENVIRONMENT/*.sh -t $SCRIPTS_DIR && chown -R ubuntu:ubuntu $SCRIPTS_DIR && chmod +x $SCRIPTS_DIR/*.sh
-    # crontab -u ubuntu $DIR/deploy/cron/$ENVIRONMENT/jobs
 
     # Clean Up the Stop Containers
     docker container prune -f

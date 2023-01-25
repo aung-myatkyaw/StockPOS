@@ -28,18 +28,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "codepipeline_bucket_mumbai_lif
 }
 
 // Configurations Bucket for Singapore Region
-resource "aws_s3_bucket" "config_bucket" {
-  bucket = var.singapore_configs_bucket_name
-}
-
-resource "aws_s3_bucket_acl" "config_bucket_acl" {
-  bucket = aws_s3_bucket.config_bucket.id
-  acl    = "private"
-}
-
-resource "aws_s3_bucket_versioning" "config_bucket_versioning" {
-  bucket = aws_s3_bucket.config_bucket.id
-  versioning_configuration {
-    status = "Enabled"
-  }
+data "aws_s3_bucket" "config_bucket" {
+  bucket = var.configs_bucket_name
 }

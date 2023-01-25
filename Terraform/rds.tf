@@ -23,7 +23,7 @@ resource "aws_db_instance" "stockpos_db_instance" {
   option_group_name                   = aws_db_option_group.stockpos_db_og.name
   parameter_group_name                = aws_db_parameter_group.stockpos_db_pg.name
   password                            = random_password.stockpos_db_password.result
-  performance_insights_enabled        = true
+  # performance_insights_enabled        = true
   port                                = 3306
   publicly_accessible                 = true
   skip_final_snapshot                 = true
@@ -42,6 +42,14 @@ resource "aws_ssm_parameter" "mysql_server_url" {
   description = "Server URL for MySQL"
   type        = "SecureString"
   value       = aws_db_instance.stockpos_db_instance.address
+}
+
+resource "aws_ssm_parameter" "mysql_username" {
+  provider    = aws.mumbai
+  name        = "mysql-dbusername"
+  description = "Server username for MySQL"
+  type        = "SecureString"
+  value       = aws_db_instance.stockpos_db_instance.username
 }
 
 resource "aws_ssm_parameter" "mysql_password" {

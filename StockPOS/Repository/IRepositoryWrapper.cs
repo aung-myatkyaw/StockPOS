@@ -15,6 +15,28 @@ namespace StockPOS.Repository
         ISaleRepository Sale { get; }
 
         IProductcategoryRepository Productcategory { get; }
-//////Template Place Holder/////
+
+        ICustomerRepository Customer { get; }
+
+        IChangedpricelogRepository Changedpricelog { get; }
+
+        IDebtbalanceRepository Debtbalance { get; }
+
+        IProductbrandRepository Productbrand { get; }
+        //////Template Place Holder/////
+        
+        IProductSizeRepository Productsize { get; }
+
+        IProducttypeRepository Producttype { get; }
+
+        IGroupvillageRepository Groupvillage { get;  }
+
+        ISearchedcountRepository Searchedcount { get; }
+
+        IUsertypeRepository Usertype { get; }
+
+        IVillageRepository Village { get; }
+
+        IWarehouseRepository Warehouse { get; }
     }
 }

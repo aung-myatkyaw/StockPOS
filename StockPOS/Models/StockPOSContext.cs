@@ -3,27 +3,28 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using StockPOS.Settings;
 
 namespace StockPOS.Models
 {
     public partial class StockPOSContext : DbContext
     {
-        //private IConfiguration _configuration;
-        //private string _connectionString;
+        private IConfiguration _configuration;
+        private string _connectionString;
         public readonly IHttpContextAccessor _httpContextAccessor;
         public readonly IActionContextAccessor _actionContextAccessor;
-        //private MySqlServerVersion serverVersion;
+        private MySqlServerVersion serverVersion;
 
         public StockPOSContext(DbContextOptions<StockPOSContext> options, IHttpContextAccessor httpContextAccessor, IActionContextAccessor actionContextAccessor, IConfiguration configuration)
             : base(options)
         {
             _httpContextAccessor = httpContextAccessor;
             _actionContextAccessor = actionContextAccessor;
-            //_configuration = configuration;
-            //var mysqlDbSettings = _configuration.GetSection(nameof(MysqlDbSettings)).Get<MysqlDbSettings>();
-            //_connectionString = mysqlDbSettings.ConnectionString;
+            _configuration = configuration;
+            var mysqlDbSettings = _configuration.GetSection(nameof(MysqlDbSettings)).Get<MysqlDbSettings>();
+            _connectionString = mysqlDbSettings.ConnectionString;
 
-            //serverVersion = new MySqlServerVersion(new Version(8, 0, 31));
+            serverVersion = new MySqlServerVersion(new Version(8, 0, 31));
         }
 
         public virtual DbSet<Changedpricelog> Changedpricelogs { get; set; } = null!;
@@ -42,6 +43,14 @@ namespace StockPOS.Models
         public virtual DbSet<Usertype> Usertypes { get; set; } = null!;
         public virtual DbSet<Village> Villages { get; set; } = null!;
         public virtual DbSet<Warehouse> Warehouses { get; set; } = null!;
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseMySql(_connectionString, ServerVersion.Parse("8.0.31-mysql"));
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

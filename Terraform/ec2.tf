@@ -45,7 +45,8 @@ resource "aws_launch_template" "stockpos_mumbai_template" {
 
   update_default_version = true
   image_id               = data.aws_ssm_parameter.ubuntu_image.value
-  user_data              = filebase64("startup_script.sh")
+  # user_data              = filebase64("startup_script.sh")
+  user_data = base64encode(replace(file("startup_script.sh"), "{{Config-Bucket-Name}}", var.configs_bucket_name))
 
   tag_specifications {
     resource_type = "instance"
@@ -81,7 +82,7 @@ resource "local_sensitive_file" "private_key" {
 resource "aws_s3_object" "stockpos_mumbai_staging_ssh_private_key" {
   key                    = "ec2-ssh/${var.staging_ec2_key_name}.pem"
   content                = tls_private_key.rsa.private_key_pem
-  bucket                 = aws_s3_bucket.config_bucket.id
+  bucket                 = data.aws_s3_bucket.config_bucket.id
   server_side_encryption = "AES256"
   tags = {
     Region = "Mumbai"
@@ -148,11 +149,16 @@ resource "aws_s3_object" "stockpos_mumbai_staging_ssh_private_key" {
 resource "aws_instance" "stockpos_mumbai_staging" {
   provider = aws.mumbai
   # disable_api_termination = true
+
+  depends_on = [
+    aws_db_instance.stockpos_db_instance
+  ]
+
   launch_template {
     id      = aws_launch_template.stockpos_mumbai_template.id
     version = "$Default"
   }
-  instance_type = "t4g.small"
+  instance_type = var.staging_spot_instance_types[0]
   subnet_id     = random_shuffle.subnet_for_stockpos.result[0]
   tags = {
     "Name" = var.server_tag_value
