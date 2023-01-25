@@ -8,6 +8,7 @@ services:
     #   - db
     environment:
       MysqlDbSettings:Host: ${DB_SERVER_URL}
+      MysqlDbSettings:User: ${DB_USERNAME}
       MysqlDbSettings:Password: ${DB_PASSWORD}
     ports:
       - 80:80

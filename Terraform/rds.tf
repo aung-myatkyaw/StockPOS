@@ -44,6 +44,14 @@ resource "aws_ssm_parameter" "mysql_server_url" {
   value       = aws_db_instance.stockpos_db_instance.address
 }
 
+resource "aws_ssm_parameter" "mysql_username" {
+  provider    = aws.mumbai
+  name        = "mysql-dbusername"
+  description = "Server username for MySQL"
+  type        = "SecureString"
+  value       = aws_db_instance.stockpos_db_instance.username
+}
+
 resource "aws_ssm_parameter" "mysql_password" {
   provider    = aws.mumbai
   name        = "mysql-dbpassword"
