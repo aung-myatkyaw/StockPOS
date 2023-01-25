@@ -14,7 +14,7 @@ variable "aws_region_list_for_cidr" {
 
 variable "mumbai_pipeline_bucket_name" {
   description = "Storage Bucket for Pipeline Artifacts"
-  default     = "codepipeline-artifacts-storage-mumbai-amk-152"
+  default     = "codepipeline-artifacts-storage-mumbai-wkh"
 }
 
 variable "server_tag_value" {
@@ -27,15 +27,15 @@ variable "staging_ec2_key_name" {
   default     = "stockpos-staging"
 }
 
-variable "singapore_configs_bucket_name" {
+variable "configs_bucket_name" {
   description = "Storage Bucket for Config files"
-  default     = "config-files-amk-152"
+  default     = "config-files-wkh"
 }
 
 variable "staging_spot_instance_types" {
   description = "Spot Instance Types for staging server"
   type        = list(string)
-  default     = ["t4g.small"]
+  default     = ["t2.micro"]
 }
 
 variable "ecr_build_role_name" {

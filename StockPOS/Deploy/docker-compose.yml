@@ -2,7 +2,7 @@ version: "3"
 services:
   backend:
     container_name: stockpos-backend
-    image: ${ECR}/${REPO}:${STOCKPOS_BACKEND_TAG:-latest}
+    image: ${REPO}:${STOCKPOS_BACKEND_TAG:-latest}
     restart: always
     # depends_on:
     #   - db

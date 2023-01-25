@@ -2,42 +2,40 @@ version: 0.2
 
 env:
   variables:
-      ECR: "582415712618.dkr.ecr.ap-south-1.amazonaws.com"
-      REPO: "stockpos-backend-mumbai"
-      VERSION: "1.0.0"
-      LATEST: "latest"
-      ENV_TAG_KEY: "STOCKPOS_BACKEND_TAG"
-      DockerHub_USERNAME: "yinko2"
-      DOCKER_BUILDKIT: 1
+    VERSION: "1.0.0"
+    LATEST: "latest"
+    ENV_TAG_KEY: "STOCKPOS_BACKEND_TAG"
+    DOCKER_BUILDKIT: 1
   parameter-store:
-      DockerHub_PASSWORD: dockerhub-password
+    REPO: stockpos-ecr-url
+    DockerHub_USERNAME: dockerhub-username
+    DockerHub_PASSWORD: dockerhub-password
 phases:
   pre_build:
     commands:
       - echo Check Docker
       - docker --version
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REPO
       - echo Pull Latest Image for cache
-      - docker pull $ECR/$REPO:$LATEST || true
+      - docker pull $REPO:$LATEST || true
       - echo Docker Hub Login
       - docker login -u $DockerHub_USERNAME -p $DockerHub_PASSWORD
   build:
     commands:
       - echo Building...
-      - docker build --file ./StockPOS/Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 --tag $ECR/$REPO:$VERSION --cache-from $ECR/$REPO:$LATEST .
-      - docker push $ECR/$REPO:$VERSION
-      - docker tag $ECR/$REPO:$VERSION $ECR/$REPO:$LATEST
-      - docker push $ECR/$REPO:$LATEST
-      - docker rmi $ECR/$REPO:$VERSION
-      - docker rmi $ECR/$REPO:$LATEST
+      - docker build --file ./StockPOS/Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 --tag $REPO:$VERSION --cache-from $REPO:$LATEST .
+      - docker push $REPO:$VERSION
+      - docker tag $REPO:$VERSION $REPO:$LATEST
+      - docker push $REPO:$LATEST
+      - docker rmi $REPO:$VERSION
+      - docker rmi $REPO:$LATEST
       - echo Build completed on `date`
   post_build:
     commands:
       - echo Making File for CodeDeploy
       # - cp ./deploy/scripts/deploy.sh.tpl ./deploy.sh
       - sed -i "/^$ENV_TAG_KEY=/c $ENV_TAG_KEY=$VERSION" ./StockPOS/Deploy/.env
-      - sed -i "/^ECR=/c ECR=$ECR" ./StockPOS/Deploy/.env
       - sed -i "/^REPO=/c REPO=$REPO" ./StockPOS/Deploy/.env
 artifacts:
   files:
