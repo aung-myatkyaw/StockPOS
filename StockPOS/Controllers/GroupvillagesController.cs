@@ -27,6 +27,7 @@ namespace StockPOS.Controllers
                 //test git by wkh
                 var Groupvillagelist = await _repositoryWrapper.Groupvillage.FindAllAsync();
                 return Ok(new { status = "success", data = Groupvillagelist });
+                ///test wkh
             }
             catch (Exception ex)
             {
