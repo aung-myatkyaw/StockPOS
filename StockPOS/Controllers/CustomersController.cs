@@ -32,6 +32,7 @@ namespace StockPOS.Controllers
                 await _repositoryWrapper.Eventlog.Error("get CustomerList fail", ex.Message);
                 return BadRequest(new { status = "fail", data = "Something went wrong." });
             }
+            ///test git by wkh
         }
 
         // GET: api/Customers/5
