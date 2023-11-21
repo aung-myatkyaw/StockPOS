@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="6.0.2" />
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.12">
@@ -27,4 +29,14 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Models\CreateModels\" />
+    <None Remove="Models\ViewModels\" />
+    <None Remove="AutoMapper\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\CreateModels\" />
+    <Folder Include="Models\ViewModels\" />
+    <Folder Include="AutoMapper\" />
+  </ItemGroup>
 </Project>

@@ -9,7 +9,7 @@ namespace StockPOS.Models
     [Table("productcategory")]
     [MySqlCharSet("utf8mb3")]
     [MySqlCollation("utf8mb3_general_ci")]
-    public partial class Productcategory
+    public partial class Productcategory : BaseClass
     {
         public Productcategory()
         {
@@ -18,12 +18,16 @@ namespace StockPOS.Models
 
         [Key]
         [Column("CategoryID")]
-        [StringLength(15)]
+        [StringLength(50)]
         public string CategoryId { get; set; } = null!;
+
         [StringLength(100)]
+        [Required]
         public string? CategoryName { get; set; }
-        [Column(TypeName = "datetime")]
-        public DateTime? CreatedDate { get; set; }
+
+        [StringLength(100)]
+        public string? Description { get; set; }
+        
         public sbyte? Visible { get; set; }
 
         [InverseProperty("Category")]
