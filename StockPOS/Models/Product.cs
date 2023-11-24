@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace StockPOS.Models
 {
@@ -13,7 +14,7 @@ namespace StockPOS.Models
     [Index("ProductTypeId", Name = "ProductType_idx")]
     [MySqlCharSet("utf8mb3")]
     [MySqlCollation("utf8mb3_general_ci")]
-    public partial class Product
+    public partial class Product : BaseClass
     {
         public Product()
         {
@@ -25,30 +26,41 @@ namespace StockPOS.Models
 
         [Key]
         [Column("ProductID")]
-        [StringLength(15)]
+        [StringLength(50)]
         public string ProductId { get; set; } = null!;
+
         [StringLength(30)]
         public string? Barcode { get; set; }
+
         [StringLength(100)]
         public string? Name { get; set; }
-        [StringLength(10)]
+
+        [StringLength(50)]
         public string? ShortName { get; set; }
+
         [Column("CategoryID")]
-        [StringLength(15)]
+        [StringLength(50)]
         public string? CategoryId { get; set; }
+
         [Column("ProductTypeID")]
-        [StringLength(15)]
+        [StringLength(50)]
         public string? ProductTypeId { get; set; }
+
         [Column("BrandID")]
-        [StringLength(15)]
+        [StringLength(50)]
         public string? BrandId { get; set; }
+
         public double? BoughtPrice { get; set; }
         public double? SellPriceRetail { get; set; }
         public double? SellPricewhole { get; set; }
+
         [Column(TypeName = "datetime")]
         public DateTime? UpdatedDate { get; set; }
-        [Column(TypeName = "datetime")]
-        public DateTime? CreatedDate { get; set; }
+
+        [Column("UpdatedBy")]
+        public string? UpdatedBy{ get; set; }
+
+
         [StringLength(200)]
         public string? ImageUrl { get; set; }
         public int? AlertQuantity { get; set; }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +16,7 @@ namespace StockPOS.Controllers
     [ApiController]
     public class ChangedpricelogsController : BaseController
     {
-        public ChangedpricelogsController(IRepositoryWrapper repositoryWrapper, IConfiguration configuration) : base(repositoryWrapper, configuration)
+        public ChangedpricelogsController(IRepositoryWrapper repositoryWrapper, IConfiguration configuration,IMapper mapper) : base(repositoryWrapper, configuration, mapper)
         {
         }
 

@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using System.Text.Json;
 using System.Net.Mime;
+using AutoMapper;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +42,10 @@ builder.Services.AddControllers(options =>
 });
 
 builder.Services.AddTransient<TokenProviderMiddleware>();
+
+
+builder.Services.AddAutoMapper(typeof(Program));
+
 
 //below 3 lines need to inject IHttpContextAccessor and IActionContextAccessor to AppDb.cs to get login claims
 builder.Services.AddHttpContextAccessor();
