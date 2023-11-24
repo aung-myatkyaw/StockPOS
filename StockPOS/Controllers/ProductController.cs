@@ -43,7 +43,7 @@ namespace StockPOS.Controllers
             try
             {
                 var Productlist = await _repositoryWrapper.Product.Get_ProductList_ForApp(string.Empty, string.Empty, string.Empty);
-                return Ok(new { status = "success", data = Productlist.Value });
+                return Ok(Productlist.Value);
             }
             catch (Exception ex)
             {
@@ -58,7 +58,7 @@ namespace StockPOS.Controllers
             try
             {
                 var Productlist = await _repositoryWrapper.Product.Get_ProductList_ForApp(searchModels.SearchString, string.Empty, searchModels.SearchString);
-                return Ok(new { status = "success", data = Productlist.Value });
+                return Ok(Productlist.Value);
             }
             catch (Exception ex)
             {
