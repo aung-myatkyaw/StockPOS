@@ -268,7 +268,7 @@ namespace StockPOS.CustomTokenAuthProvider
                 
                 await ResponseMessage(response, context, StatusCodes.Status200OK);
                  
-                await _repository.Eventlog.Info("Successful login for this account UserName: " + username);
+               // await _repository.Eventlog.Info("Successful login for this account UserName: " + username);
             }
             catch(Exception ex) 
             {

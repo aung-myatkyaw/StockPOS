@@ -8,6 +8,7 @@ using StockPOS.Models;
 using StockPOS.Models.CreateModels;
 using StockPOS.Repository;
 using StockPOS.Util;
+using StockPOS.Models.ViewModels;
 
 namespace StockPOS.Controllers
 {
@@ -35,11 +36,42 @@ namespace StockPOS.Controllers
             }
         }
 
-        // GET: api/Product/5
-        [HttpGet("{barcode}")]
-        public async Task<ActionResult<Product>> GetProduct(string barcode)
+
+        [HttpGet("ProductlistHome")]
+        public async Task<ActionResult<Product_View_Model>> GetProducts_For_Home()
         {
-            var Product = await _repositoryWrapper.Product.FindByIDAsync(barcode);
+            try
+            {
+                var Productlist = await _repositoryWrapper.Product.Get_ProductList_ForApp(string.Empty, string.Empty, string.Empty);
+                return Ok(new { status = "success", data = Productlist.Value });
+            }
+            catch (Exception ex)
+            {
+                await _repositoryWrapper.Eventlog.Error("get Productlist fail", ex.Message);
+                return BadRequest(new { status = "fail", data = "Something went wrong." });
+            }
+        }
+
+        [HttpGet("ProductlistHomeSearch")]
+        public async Task<ActionResult<Product_View_Model>> Get_Search_Products_For_Home(SearchModels searchModels)
+        {
+            try
+            {
+                var Productlist = await _repositoryWrapper.Product.Get_ProductList_ForApp(searchModels.SearchString, string.Empty, searchModels.SearchString);
+                return Ok(new { status = "success", data = Productlist.Value });
+            }
+            catch (Exception ex)
+            {
+                await _repositoryWrapper.Eventlog.Error("get Productlist fail", ex.Message);
+                return BadRequest(new { status = "fail", data = "Something went wrong." });
+            }
+        }
+
+        // GET: api/Product/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Product>> GetProduct(string id)
+        {
+            var Product = await _repositoryWrapper.Product.FindByIDAsync(id);
 
             if (Product == null)
             {
@@ -149,6 +181,9 @@ namespace StockPOS.Controllers
         {
             try
             {
+                ///IF You want to delete Product Item , firstly you need to delete sale item with product ID
+                //var Sales = await _repositoryWrapper.Sale.AnyByConditionAsync(e => e.ProductId == id);
+
                 var Product = await _repositoryWrapper.Product.FindByIDAsync(id);
                 if (Product == null)
                 {
