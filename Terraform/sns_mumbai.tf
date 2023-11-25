@@ -1,48 +1,29 @@
-// Mumbai Region Notification Topic
+// Notification Topic
 resource "aws_sns_topic" "mumbai_notification_topic" {
   provider = aws.mumbai
-  name     = "mumbai-sns-topic"
+  name     = "stockpos-sns-topic-${data.aws_region.mumbai.name}"
 }
 
-// Mumbai Region Notification Subscriptions
+// Notification Subscriptions
 resource "aws_sns_topic_subscription" "mumbai_notification_topic_subscriptions" {
   provider  = aws.mumbai
-  count     = length(var.mumbai_subscription_emails)
+  count     = length(var.subscription_emails)
   topic_arn = aws_sns_topic.mumbai_notification_topic.arn
   protocol  = "email"
-  endpoint  = var.mumbai_subscription_emails[count.index]
+  endpoint  = var.subscription_emails[count.index]
 }
 
-// Topic Policy for Mumbai Staging
+// Topic Policy for Staging
 resource "aws_sns_topic_policy" "mumbai_notification_topic_policy" {
   provider = aws.mumbai
   arn      = aws_sns_topic.mumbai_notification_topic.arn
-  policy   = data.aws_iam_policy_document.mumbai_sns_topic_policy.json
-}
-
-// policy document
-data "aws_iam_policy_document" "mumbai_sns_topic_policy" {
-  statement {
-    actions = ["SNS:Publish"]
-
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["codestar-notifications.amazonaws.com", "events.amazonaws.com"]
-    }
-
-    resources = [
-      aws_sns_topic.mumbai_notification_topic.arn,
-    ]
-  }
-  version = "2008-10-17"
+  policy   = data.aws_iam_policy_document.sns_topic_policy.json
 }
 
 // EventBridge Rule for spot fleet change in Mumbai Region
-resource "aws_cloudwatch_event_rule" "spot_fleet_change_event_notification_rule_mumbai" {
+resource "aws_cloudwatch_event_rule" "mumbai_spot_fleet_change_event_notification_rule" {
   provider = aws.mumbai
-  name     = "ec2-spot-fleet-change-mumbai"
+  name     = "ec2-spot-fleet-change-${data.aws_region.mumbai.name}"
   event_pattern = jsonencode(
     {
       detail-type = [
@@ -60,18 +41,18 @@ resource "aws_cloudwatch_event_rule" "spot_fleet_change_event_notification_rule_
   )
 }
 
-// EventBridge Spot Change Noti Target in Mumbai Region
-resource "aws_cloudwatch_event_target" "spot_fleet_change_event_noti_target_mumbai" {
+// EventBridge Spot Change Noti Target in mumbai Region
+resource "aws_cloudwatch_event_target" "mumbai_spot_fleet_change_event_noti_target" {
   provider  = aws.mumbai
-  target_id = "spot-change-trigger-lambda-function-to-process-sns-mumbai"
-  rule      = aws_cloudwatch_event_rule.spot_fleet_change_event_notification_rule_mumbai.name
-  arn       = aws_lambda_function.sns_email_process_mumbai.arn
+  target_id = "spot-change-trigger-lambda-function-to-process-sns-${data.aws_region.mumbai.name}"
+  rule      = aws_cloudwatch_event_rule.mumbai_spot_fleet_change_event_notification_rule.name
+  arn       = aws_lambda_function.sns_email_process.arn
 }
 
-// EventBridge Rule for Pipeline State Change in Mumbai Region
-resource "aws_cloudwatch_event_rule" "codepipeline_event_notification_rule_mumbai" {
+// EventBridge Rule for Pipeline State Change in mumbai Region
+resource "aws_cloudwatch_event_rule" "mumbai_codepipeline_event_notification_rule" {
   provider = aws.mumbai
-  name     = "codepipeline-noti-mumbai"
+  name     = "codepipeline-noti-${data.aws_region.mumbai.name}"
   event_pattern = jsonencode(
     {
       detail = {
@@ -94,35 +75,27 @@ resource "aws_cloudwatch_event_rule" "codepipeline_event_notification_rule_mumba
   )
 }
 
-// EventBridge Pipeline Noti Target in Mumbai Region
-resource "aws_cloudwatch_event_target" "codepipeline_event_noti_target_mumbai" {
+// EventBridge Pipeline Noti Target in mumbai Region
+resource "aws_cloudwatch_event_target" "mumbai_codepipeline_event_noti_target" {
   provider  = aws.mumbai
-  target_id = "codepipeline-trigger-lambda-function-to-process-sns-mumbai"
-  rule      = aws_cloudwatch_event_rule.codepipeline_event_notification_rule_mumbai.name
-  arn       = aws_lambda_function.sns_email_process_mumbai.arn
-}
-
-// Archive Code For Lambda Function
-data "archive_file" "sns_email_process_lambda_code_mumbai" {
-  type                    = "zip"
-  source_content          = replace(file("./lambda/sns-email-process/main.py"), "{{TOPIC_ARN}}", aws_sns_topic.mumbai_notification_topic.arn)
-  source_content_filename = "main.py"
-  output_path             = "./lambda/sns-email-process-mumbai.zip"
+  target_id = "codepipeline-trigger-lambda-function-to-process-sns-${data.aws_region.mumbai.name}"
+  rule      = aws_cloudwatch_event_rule.mumbai_codepipeline_event_notification_rule.name
+  arn       = aws_lambda_function.mumbai_sns_email_process.arn
 }
 
 // Lambda Function for Processing SNS
-resource "aws_lambda_function" "sns_email_process_mumbai" {
+resource "aws_lambda_function" "mumbai_sns_email_process" {
   provider      = aws.mumbai
   architectures = ["arm64"]
-  function_name = "sns-email-process-mumbai"
+  function_name = "sns-email-process-${data.aws_region.mumbai.name}"
   description   = "Lambda Function for Processing SNS Notifications from AWS Events"
   role          = aws_iam_role.lambda_process_sns_role.arn
 
-  filename         = data.archive_file.sns_email_process_lambda_code_mumbai.output_path
+  filename         = data.archive_file.sns_email_process_lambda_code.output_path
   handler          = "main.lambda_handler"
   package_type     = "Zip"
   runtime          = "python3.9"
-  source_code_hash = data.archive_file.sns_email_process_lambda_code_mumbai.output_base64sha256
+  source_code_hash = data.archive_file.sns_email_process_lambda_code.output_base64sha256
   timeout          = 15
 
   memory_size = 128
@@ -132,21 +105,21 @@ resource "aws_lambda_function" "sns_email_process_mumbai" {
 }
 
 // Spot Change Lambda Function Trigger Permission
-resource "aws_lambda_permission" "sns_process_message_spot_mumbai_permission" {
+resource "aws_lambda_permission" "mumbai_sns_process_message_spot_permission" {
   provider      = aws.mumbai
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.sns_email_process_mumbai.function_name
+  function_name = aws_lambda_function.mumbai_sns_email_process.function_name
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.spot_fleet_change_event_notification_rule_mumbai.arn
-  statement_id  = "AWSEvents_spot_fleet_change_invoke_lambda_process_sns_mumbai"
+  source_arn    = aws_cloudwatch_event_rule.mumbai_spot_fleet_change_event_notification_rule.arn
+  statement_id  = "AWSEvents_spot_fleet_change_invoke_lambda_process_sns"
 }
 
 // Codepipeline Lambda Function Trigger Permission
-resource "aws_lambda_permission" "sns_process_message_codepipeline_mumbai_permission" {
+resource "aws_lambda_permission" "mumbai_sns_process_message_codepipeline_permission" {
   provider      = aws.mumbai
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.sns_email_process_mumbai.function_name
+  function_name = aws_lambda_function.mumbai_sns_email_process.function_name
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.codepipeline_event_notification_rule_mumbai.arn
-  statement_id  = "AWSEvents_codepipeline_change_invoke_lambda_process_sns_mumbai"
+  source_arn    = aws_cloudwatch_event_rule.mumbai_codepipeline_event_notification_rule.arn
+  statement_id  = "AWSEvents_codepipeline_change_invoke_lambda_process_sns"
 }

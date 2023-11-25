@@ -24,6 +24,18 @@ provider "aws" {
 
 // Define Provider and Region
 provider "aws" {
+  region  = "ap-south-2"
+  profile = "wkh"
+  alias   = "hyderabad"
+  default_tags {
+    tags = {
+      Project = "StockPOS"
+    }
+  }
+}
+
+// Define Provider and Region
+provider "aws" {
   region  = "ap-southeast-1"
   profile = "wkh"
   default_tags {

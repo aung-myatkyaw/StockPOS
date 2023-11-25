@@ -1,7 +1,7 @@
 resource "aws_db_instance" "stockpos_db_instance" {
-  provider                   = aws.mumbai
+  provider                   = aws.hyderabad
   allocated_storage          = 20
-  auto_minor_version_upgrade = false
+  auto_minor_version_upgrade = true
   copy_tags_to_snapshot      = true
   db_subnet_group_name       = aws_db_subnet_group.stockpos_db_subnet_group.name
   deletion_protection        = false
@@ -11,7 +11,7 @@ resource "aws_db_instance" "stockpos_db_instance" {
     "slowquery"
   ]
   engine                              = "mysql"
-  engine_version                      = "8.0.31"
+  engine_version                      = "8.0"
   iam_database_authentication_enabled = false
   identifier                          = var.server_tag_value
   instance_class                      = "db.t4g.micro"
@@ -37,7 +37,7 @@ resource "random_password" "stockpos_db_password" {
 }
 
 resource "aws_ssm_parameter" "mysql_server_url" {
-  provider    = aws.mumbai
+  provider    = aws.hyderabad
   name        = "mysql-server-url"
   description = "Server URL for MySQL"
   type        = "SecureString"
@@ -45,7 +45,7 @@ resource "aws_ssm_parameter" "mysql_server_url" {
 }
 
 resource "aws_ssm_parameter" "mysql_username" {
-  provider    = aws.mumbai
+  provider    = aws.hyderabad
   name        = "mysql-dbusername"
   description = "Server username for MySQL"
   type        = "SecureString"
@@ -53,7 +53,7 @@ resource "aws_ssm_parameter" "mysql_username" {
 }
 
 resource "aws_ssm_parameter" "mysql_password" {
-  provider    = aws.mumbai
+  provider    = aws.hyderabad
   name        = "mysql-dbpassword"
   description = "Admin Password for MySQL RDS"
   type        = "SecureString"
@@ -61,14 +61,17 @@ resource "aws_ssm_parameter" "mysql_password" {
 }
 
 resource "aws_db_subnet_group" "stockpos_db_subnet_group" {
-  provider    = aws.mumbai
+  provider    = aws.hyderabad
   name        = "stockpos-db-subnet-group"
   description = "Subnet Group for RDS"
-  subnet_ids  = data.aws_subnets.mumbai_public_subnets_data.ids
+  subnet_ids  = data.aws_subnets.public_subnets_data.ids
+  depends_on = [
+    aws_subnet.public_subnets
+  ]
 }
 
 resource "aws_db_parameter_group" "stockpos_db_pg" {
-  provider    = aws.mumbai
+  provider    = aws.hyderabad
   description = "PG with logging"
   family      = "mysql8.0"
   name        = "mysql-8-parameter-group"
@@ -96,7 +99,7 @@ resource "aws_db_parameter_group" "stockpos_db_pg" {
 }
 
 resource "aws_db_option_group" "stockpos_db_og" {
-  provider                 = aws.mumbai
+  provider                 = aws.hyderabad
   engine_name              = "mysql"
   major_engine_version     = "8.0"
   name                     = "default-mysql-8"
@@ -126,9 +129,9 @@ resource "aws_db_option_group" "stockpos_db_og" {
 
 # Security Group for RDS
 resource "aws_security_group" "stockpos_db_sg" {
-  provider    = aws.mumbai
+  provider    = aws.hyderabad
   name        = var.server_tag_value
-  vpc_id      = aws_vpc.mumbai_vpc.id
+  vpc_id      = aws_vpc.vpc.id
   description = "Security Group for StockPOS RDS"
   ingress {
     cidr_blocks = ["0.0.0.0/0"]
@@ -137,7 +140,7 @@ resource "aws_security_group" "stockpos_db_sg" {
     to_port     = 3306
   }
   ingress {
-    cidr_blocks = [aws_vpc.mumbai_vpc.cidr_block]
+    cidr_blocks = [aws_vpc.vpc.cidr_block]
     from_port   = 3306
     protocol    = "tcp"
     to_port     = 3306

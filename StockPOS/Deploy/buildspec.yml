@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    VERSION: "1.0.0"
+    VERSION: "1.0.1"
     LATEST: "latest"
     ENV_TAG_KEY: "STOCKPOS_BACKEND_TAG"
     DOCKER_BUILDKIT: 1

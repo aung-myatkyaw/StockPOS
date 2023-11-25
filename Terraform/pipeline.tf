@@ -1,14 +1,21 @@
 // Pipeline for building and deploying stockpos backend docker image to ec2 instance
-resource "aws_codepipeline" "stockpos_mumbai_backend_pipeline" {
+resource "aws_codepipeline" "stockpos_backend_pipeline" {
   provider = aws.mumbai
-  name     = var.backend_pipeline_name
+  name     = replace(var.backend_pipeline_name, "{{REGION_NAME}}", data.aws_region.current.name)
 
   # depends_on = [
-  #   aws_spot_fleet_request.stockpos_mumbai_staging_fleet_request
+  #   aws_spot_fleet_request.stockpos_staging_fleet_request
   # ]
 
   artifact_store {
-    location = aws_s3_bucket.codepipeline_bucket_mumbai.bucket
+    location = aws_s3_bucket.codepipeline_bucket.bucket
+    region   = data.aws_region.mumbai.name
+    type     = "S3"
+  }
+
+  artifact_store {
+    location = aws_s3_bucket.codedeploy_bucket.bucket
+    region   = data.aws_region.current.name
     type     = "S3"
   }
 
@@ -63,10 +70,11 @@ resource "aws_codepipeline" "stockpos_mumbai_backend_pipeline" {
       input_artifacts  = ["SourceArtifact"]
       output_artifacts = ["BuildArtifact"]
       version          = "1"
+      region           = data.aws_region.mumbai.name
       namespace        = "BuildVariables"
 
       configuration = {
-        ProjectName = aws_codebuild_project.stockpos_mumbai_backend_build.name
+        ProjectName = aws_codebuild_project.stockpos_backend_build.name
       }
     }
   }
@@ -82,18 +90,19 @@ resource "aws_codepipeline" "stockpos_mumbai_backend_pipeline" {
       provider        = "CodeDeploy"
       input_artifacts = ["BuildArtifact"]
       version         = "1"
+      region          = data.aws_region.current.name
       namespace       = "DeployVariables"
 
       configuration = {
-        ApplicationName     = aws_codedeploy_app.stockpos_mumbai_codedeploy_application.name
-        DeploymentGroupName = aws_codedeploy_deployment_group.stockpos_mumbai_codedeploy_group.deployment_group_name
+        ApplicationName     = aws_codedeploy_app.stockpos_codedeploy_application.name
+        DeploymentGroupName = aws_codedeploy_deployment_group.stockpos_codedeploy_group.deployment_group_name
       }
     }
   }
 }
 
 // CodeBuild Project
-resource "aws_codebuild_project" "stockpos_mumbai_backend_build" {
+resource "aws_codebuild_project" "stockpos_backend_build" {
   provider               = aws.mumbai
   name                   = var.backend_build_name
   description            = "CodeBuild Project for Building and Pushing KMS Backend Docker Image to ECR"
@@ -101,6 +110,10 @@ resource "aws_codebuild_project" "stockpos_mumbai_backend_build" {
   artifacts {
     type = "CODEPIPELINE"
     name = var.backend_build_name
+  }
+
+  lifecycle {
+    ignore_changes = [project_visibility]
   }
 
   # cache {
@@ -117,6 +130,8 @@ resource "aws_codebuild_project" "stockpos_mumbai_backend_build" {
     image_pull_credentials_type = "CODEBUILD"
     privileged_mode             = true
   }
+  project_visibility = "PRIVATE"
+
   service_role = aws_iam_role.ecr_codebuild_role.arn
 
   source {
@@ -127,29 +142,29 @@ resource "aws_codebuild_project" "stockpos_mumbai_backend_build" {
 
   logs_config {
     cloudwatch_logs {
-      group_name = aws_cloudwatch_log_group.stockpos_mumbai_backend_log_group.name
+      group_name = aws_cloudwatch_log_group.stockpos_backend_log_group.name
     }
   }
 }
 
 // Cloud Watch Log Group
-resource "aws_cloudwatch_log_group" "stockpos_mumbai_backend_log_group" {
+resource "aws_cloudwatch_log_group" "stockpos_backend_log_group" {
   provider          = aws.mumbai
   name              = format("%s%s", "/aws/codebuild/", var.backend_build_name)
   retention_in_days = 30
 }
 
-// StockPOS Code Deploy Application For Mumbai Region
-resource "aws_codedeploy_app" "stockpos_mumbai_codedeploy_application" {
-  provider         = aws.mumbai
+// StockPOS Code Deploy Application For Current Region
+resource "aws_codedeploy_app" "stockpos_codedeploy_application" {
+  provider         = aws.hyderabad
   compute_platform = "Server"
-  name             = var.codedeploy_application_name
+  name             = replace(var.codedeploy_application_name, "{{REGION_NAME}}", data.aws_region.current.name)
 }
 
 // Deployment Group for ec2 provisioning
-resource "aws_codedeploy_deployment_group" "stockpos_mumbai_codedeploy_group" {
-  provider              = aws.mumbai
-  app_name              = aws_codedeploy_app.stockpos_mumbai_codedeploy_application.name
+resource "aws_codedeploy_deployment_group" "stockpos_codedeploy_group" {
+  provider              = aws.hyderabad
+  app_name              = aws_codedeploy_app.stockpos_codedeploy_application.name
   deployment_group_name = var.codedeploy_group_name
   service_role_arn      = aws_iam_role.codedeploy_role.arn
 

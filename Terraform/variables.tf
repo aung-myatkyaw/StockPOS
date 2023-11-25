@@ -13,9 +13,9 @@ variable "aws_region_list_for_cidr" {
   }
 }
 
-variable "mumbai_pipeline_bucket_name" {
+variable "pipeline_bucket_name" {
   description = "Storage Bucket for Pipeline Artifacts"
-  default     = "codepipeline-artifacts-storage-mumbai-wkh"
+  default     = "codepipeline-artifacts-storage-wkh-{{REGION_NAME}}"
 }
 
 variable "server_tag_value" {
@@ -36,12 +36,12 @@ variable "configs_bucket_name" {
 variable "staging_spot_instance_types" {
   description = "Spot Instance Types for staging server"
   type        = list(string)
-  default     = ["t2.micro"]
+  default     = ["t4g.small"]
 }
 
 variable "machine_type" {
   description = "Machine Architecture"
-  default     = "amd64"
+  default     = "arm64"
 }
 
 variable "ecr_build_role_name" {
@@ -71,7 +71,7 @@ variable "git_branch" {
 
 variable "backend_build_name" {
   description = "Backend CodeBuild Name"
-  default     = "stockpos-backend-mumbai-build-and-push-docker-image"
+  default     = "stockpos-backend-build-and-push-docker-image"
 }
 
 variable "pipeline_role_name" {
@@ -81,12 +81,12 @@ variable "pipeline_role_name" {
 
 variable "backend_pipeline_name" {
   description = "Backend Pipeline Name"
-  default     = "stockpos-backend-mumbai"
+  default     = "stockpos-backend-{{REGION_NAME}}"
 }
 
 variable "codedeploy_application_name" {
   description = "Codedeploy Application Name"
-  default     = "StockPOS-CodeDeploy-Application-Mumbai"
+  default     = "StockPOS-CodeDeploy-Application-{{REGION_NAME}}"
 }
 
 variable "codedeploy_group_name" {
@@ -99,8 +99,8 @@ variable "codedeploy_role_name" {
   default     = "CodeDeployRole"
 }
 
-variable "mumbai_subscription_emails" {
-  description = "Create Topic Subscriptions with these emails for mumbai region"
+variable "subscription_emails" {
+  description = "Create Topic Subscriptions with these emails for current region"
   type        = list(string)
   default     = ["aungmyatkyaw.kk@gmail.com"]
 }
