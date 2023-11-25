@@ -174,7 +174,7 @@ resource "aws_instance" "stockpos_staging" {
   }
 
   lifecycle {
-    ignore_changes = [ami, user_data, launch_template]
+    ignore_changes = [ami, user_data, launch_template, associate_public_ip_address]
   }
 }
 
