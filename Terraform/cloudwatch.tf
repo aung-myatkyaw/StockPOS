@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_dashboard" "main" {
-  provider       = aws.mumbai
+  provider       = aws.hyderabad
   dashboard_name = "StockPOS"
   dashboard_body = jsonencode(
     {
@@ -16,7 +16,7 @@ resource "aws_cloudwatch_dashboard" "main" {
                 "AWS/EC2",
                 "CPUUtilization",
                 "InstanceId",
-                aws_instance.stockpos_mumbai_staging.id
+                aws_instance.stockpos_staging.id
               ],
             ]
             period   = 60
@@ -40,7 +40,7 @@ resource "aws_cloudwatch_dashboard" "main" {
                 "CWAgent",
                 "mem_used_percent",
                 "InstanceId",
-                aws_instance.stockpos_mumbai_staging.id,
+                aws_instance.stockpos_staging.id,
                 {
                   color = "#ff7f0e"
                 },
@@ -67,7 +67,7 @@ resource "aws_cloudwatch_dashboard" "main" {
                 "CWAgent",
                 "disk_used_percent",
                 "InstanceId",
-                aws_instance.stockpos_mumbai_staging.id,
+                aws_instance.stockpos_staging.id,
                 {
                   color = "#2ca02c"
                 },
@@ -94,7 +94,7 @@ resource "aws_cloudwatch_dashboard" "main" {
                 "AWS/EC2",
                 "CPUCreditBalance",
                 "InstanceId",
-                aws_instance.stockpos_mumbai_staging.id,
+                aws_instance.stockpos_staging.id,
                 {
                   color = "#17becf"
                 },

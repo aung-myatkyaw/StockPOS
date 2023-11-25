@@ -62,8 +62,8 @@ resource "aws_iam_policy" "codedeploy_s3_policy" {
           ]
           Effect = "Allow"
           Resource = [
-            aws_s3_bucket.codepipeline_bucket_mumbai.arn,
-            format("%s%s", aws_s3_bucket.codepipeline_bucket_mumbai.arn, "/*"),
+            aws_s3_bucket.codepipeline_bucket.arn,
+            format("%s%s", aws_s3_bucket.codepipeline_bucket.arn, "/*"),
             data.aws_s3_bucket.config_bucket.arn,
             format("%s%s", data.aws_s3_bucket.config_bucket.arn, "/*"),
           ]
@@ -342,7 +342,7 @@ resource "aws_iam_policy" "ecr_codebuild_policy" {
         ]
 
         Resource = [
-          format("%s%s", aws_s3_bucket.codepipeline_bucket_mumbai.arn, "/*")
+          format("%s%s", aws_s3_bucket.codepipeline_bucket.arn, "/*")
         ]
       },
       {

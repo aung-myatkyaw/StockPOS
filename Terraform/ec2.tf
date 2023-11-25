@@ -1,7 +1,7 @@
 # Launch Template for Spot instance
-resource "aws_launch_template" "stockpos_mumbai_template" {
-  provider = aws.mumbai
-  name     = "StockPOS-mumbai-Launch-Template"
+resource "aws_launch_template" "stockpos_template" {
+  provider = aws.hyderabad
+  name     = "StockPOS-Launch-Template"
   iam_instance_profile {
     arn = aws_iam_instance_profile.staging_ec2_instance_profile.arn
   }
@@ -20,7 +20,7 @@ resource "aws_launch_template" "stockpos_mumbai_template" {
     }
   }
 
-  description = "Spot Instance for mumbai environment"
+  description = "Spot Instance for staging environment"
 
   credit_specification {
     cpu_credits = "standard"
@@ -37,9 +37,9 @@ resource "aws_launch_template" "stockpos_mumbai_template" {
   }
 
   network_interfaces {
-    associate_public_ip_address = true
+    # associate_public_ip_address = true
     security_groups = [
-      aws_security_group.stockpos_mumbai_sg.id
+      aws_security_group.stockpos_sg.id
     ]
   }
 
@@ -63,7 +63,7 @@ resource "aws_launch_template" "stockpos_mumbai_template" {
 }
 
 resource "aws_key_pair" "ec2_key" {
-  provider   = aws.mumbai
+  provider   = aws.hyderabad
   key_name   = var.staging_ec2_key_name
   public_key = tls_private_key.rsa.public_key_openssh
 }
@@ -79,18 +79,18 @@ resource "local_sensitive_file" "private_key" {
   filename        = "${var.staging_ec2_key_name}.pem"
 }
 
-resource "aws_s3_object" "stockpos_mumbai_staging_ssh_private_key" {
+resource "aws_s3_object" "stockpos_staging_ssh_private_key" {
   key                    = "ec2-ssh/${var.staging_ec2_key_name}.pem"
   content                = tls_private_key.rsa.private_key_pem
   bucket                 = data.aws_s3_bucket.config_bucket.id
   server_side_encryption = "AES256"
   tags = {
-    Region = "Mumbai"
+    Region = data.aws_region.current.name
   }
 }
 
-# resource "aws_spot_fleet_request" "stockpos_mumbai_staging_fleet_request" {
-#   provider                            = aws.mumbai
+# resource "aws_spot_fleet_request" "stockpos_staging_fleet_request" {
+#   provider                            = aws.hyderabad
 #   allocation_strategy                 = "lowestPrice"
 #   excess_capacity_termination_policy  = "Default"
 #   fleet_type                          = "maintain"
@@ -105,7 +105,7 @@ resource "aws_s3_object" "stockpos_mumbai_staging_ssh_private_key" {
 #   wait_for_fulfillment                = true
 
 #   depends_on = [
-#     aws_eip.stockpos_mumbai_ip
+#     aws_eip.stockpos_ip
 #   ]
 
 #   spot_maintenance_strategies {
@@ -116,7 +116,7 @@ resource "aws_s3_object" "stockpos_mumbai_staging_ssh_private_key" {
 
 #   launch_template_config {
 #     launch_template_specification {
-#       id      = aws_launch_template.stockpos_mumbai_template.id
+#       id      = aws_launch_template.stockpos_template.id
 #       version = "$Default"
 #     }
 
@@ -124,7 +124,7 @@ resource "aws_s3_object" "stockpos_mumbai_staging_ssh_private_key" {
 #       for_each = var.staging_spot_instance_types
 #       content {
 #         instance_type = overrides.value
-#         subnet_id     = aws_subnet.mumbai_public_subnets[0].id
+#         subnet_id     = aws_subnet.public_subnets[0].id
 #       }
 #     }
 
@@ -132,7 +132,7 @@ resource "aws_s3_object" "stockpos_mumbai_staging_ssh_private_key" {
 #       for_each = var.staging_spot_instance_types
 #       content {
 #         instance_type = overrides.value
-#         subnet_id     = aws_subnet.mumbai_public_subnets[1].id
+#         subnet_id     = aws_subnet.public_subnets[1].id
 #       }
 #     }
 
@@ -140,14 +140,14 @@ resource "aws_s3_object" "stockpos_mumbai_staging_ssh_private_key" {
 #       for_each = var.staging_spot_instance_types
 #       content {
 #         instance_type = overrides.value
-#         subnet_id     = aws_subnet.mumbai_public_subnets[2].id
+#         subnet_id     = aws_subnet.public_subnets[2].id
 #       }
 #     }
 #   }
 # }
 
-resource "aws_instance" "stockpos_mumbai_staging" {
-  provider = aws.mumbai
+resource "aws_instance" "stockpos_staging" {
+  provider = aws.hyderabad
   # disable_api_termination = true
 
   depends_on = [
@@ -155,7 +155,7 @@ resource "aws_instance" "stockpos_mumbai_staging" {
   ]
 
   launch_template {
-    id      = aws_launch_template.stockpos_mumbai_template.id
+    id      = aws_launch_template.stockpos_template.id
     version = "$Default"
   }
   instance_type = var.staging_spot_instance_types[0]
@@ -168,25 +168,25 @@ resource "aws_instance" "stockpos_mumbai_staging" {
   }
 }
 
-# Elastic IP for StockPOS mumbai Staging
-resource "aws_eip" "stockpos_mumbai_ip" {
-  provider = aws.mumbai
-  instance = aws_instance.stockpos_mumbai_staging.id
+# Elastic IP for StockPOS Staging
+resource "aws_eip" "stockpos_ip" {
+  provider = aws.hyderabad
+  instance = aws_instance.stockpos_staging.id
   tags = {
     "Name" = var.server_tag_value
   }
-  vpc = true
+  domain = "vpc"
 }
 
 # Security Group for StockPOS Staging
-resource "aws_security_group" "stockpos_mumbai_sg" {
-  provider = aws.mumbai
-  name     = "stockpos-mumbai-staging"
-  vpc_id   = aws_vpc.mumbai_vpc.id
+resource "aws_security_group" "stockpos_sg" {
+  provider = aws.hyderabad
+  name     = "stockpos-staging"
+  vpc_id   = aws_vpc.vpc.id
   tags = {
     "Name" = var.server_tag_value
   }
-  description = "SG for StockPOS mumbai Staging Server"
+  description = "SG for StockPOS Staging Server"
   ingress {
     cidr_blocks = ["0.0.0.0/0"]
     from_port   = 22
@@ -216,7 +216,7 @@ resource "aws_security_group" "stockpos_mumbai_sg" {
 }
 
 resource "aws_ssm_association" "stockpos_staging_cloud_watch_update" {
-  provider                    = aws.mumbai
+  provider                    = aws.hyderabad
   association_name            = "Cloud_Watch_Agent_For_StockPos_Staging"
   apply_only_at_cron_interval = true
   name                        = "AWS-ConfigureAWSPackage"
@@ -235,11 +235,11 @@ resource "aws_ssm_association" "stockpos_staging_cloud_watch_update" {
   }
 }
 
-resource "aws_ssm_maintenance_window" "stockpos_mumbai_maintenace_window" {
-  provider                   = aws.mumbai
+resource "aws_ssm_maintenance_window" "stockpos_maintenace_window" {
+  provider                   = aws.hyderabad
   allow_unassociated_targets = false
   cutoff                     = 0
-  description                = "Patching Windows for StockPOS mumbai Staging Server"
+  description                = "Patching Windows for StockPOS Staging Server"
   duration                   = 1
   enabled                    = true
   name                       = var.server_tag_value
@@ -247,15 +247,15 @@ resource "aws_ssm_maintenance_window" "stockpos_mumbai_maintenace_window" {
   schedule_timezone          = "Asia/Yangon"
 }
 
-resource "aws_ssm_maintenance_window_target" "stockpos_mumbai_target" {
-  provider      = aws.mumbai
-  window_id     = aws_ssm_maintenance_window.stockpos_mumbai_maintenace_window.id
-  description   = "Target for StockPOS mumbai Staging EC2 Instance"
+resource "aws_ssm_maintenance_window_target" "stockpos_target" {
+  provider      = aws.hyderabad
+  window_id     = aws_ssm_maintenance_window.stockpos_maintenace_window.id
+  description   = "Target for StockPOS Staging EC2 Instance"
   name          = var.server_tag_value
   resource_type = "INSTANCE"
 
   # depends_on = [
-  #   aws_spot_fleet_request.stockpos_mumbai_staging_fleet_request
+  #   aws_spot_fleet_request.stockpos_staging_fleet_request
   # ]
 
   targets {
@@ -266,23 +266,23 @@ resource "aws_ssm_maintenance_window_target" "stockpos_mumbai_target" {
   }
 }
 
-resource "aws_ssm_maintenance_window_task" "stockpos_mumbai_window_task" {
-  provider         = aws.mumbai
+resource "aws_ssm_maintenance_window_task" "stockpos_window_task" {
+  provider         = aws.hyderabad
   cutoff_behavior  = "CANCEL_TASK"
   description      = "Patching Run Command for Ubuntu"
   max_concurrency  = "100%"
   max_errors       = "50%"
-  name             = "StockPOS-mumbai-Staging-Server-Ubuntu-Patching"
+  name             = "StockPOS-Staging-Server-Ubuntu-Patching"
   priority         = 1
   service_role_arn = aws_iam_role.maintenance_window_run_command.arn
   task_arn         = "AWS-RunPatchBaseline"
   task_type        = "RUN_COMMAND"
-  window_id        = aws_ssm_maintenance_window.stockpos_mumbai_maintenace_window.id
+  window_id        = aws_ssm_maintenance_window.stockpos_maintenace_window.id
 
   targets {
     key = "WindowTargetIds"
     values = [
-      aws_ssm_maintenance_window_target.stockpos_mumbai_target.id
+      aws_ssm_maintenance_window_target.stockpos_target.id
     ]
   }
 
@@ -293,7 +293,7 @@ resource "aws_ssm_maintenance_window_task" "stockpos_mumbai_window_task" {
       timeout_seconds  = 600
 
       cloudwatch_config {
-        cloudwatch_log_group_name = aws_cloudwatch_log_group.stockpos_mumbai_patching_task_log_group.name
+        cloudwatch_log_group_name = aws_cloudwatch_log_group.stockpos_patching_task_log_group.name
         cloudwatch_output_enabled = true
       }
 
@@ -314,8 +314,8 @@ resource "aws_ssm_maintenance_window_task" "stockpos_mumbai_window_task" {
 }
 
 // Cloud Watch Log Group
-resource "aws_cloudwatch_log_group" "stockpos_mumbai_patching_task_log_group" {
-  provider          = aws.mumbai
-  name              = "/aws/ssm/stockpos-mumbai-staging-ubuntu-server-patching"
+resource "aws_cloudwatch_log_group" "stockpos_patching_task_log_group" {
+  provider          = aws.hyderabad
+  name              = "/aws/ssm/stockpos-staging-ubuntu-server-patching"
   retention_in_days = 30
 }

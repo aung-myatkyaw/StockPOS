@@ -1,7 +1,6 @@
 resource "aws_ecr_repository" "stockpos_backend" {
-  provider             = aws.mumbai
   image_tag_mutability = "MUTABLE"
-  name                 = "stockpos-backend-mumbai"
+  name                 = "stockpos-backend"
 
   image_scanning_configuration {
     scan_on_push = false
@@ -9,7 +8,6 @@ resource "aws_ecr_repository" "stockpos_backend" {
 }
 
 resource "aws_ecr_lifecycle_policy" "stockpos_backend_lifecycle_policy" {
-  provider   = aws.mumbai
   repository = aws_ecr_repository.stockpos_backend.name
   policy = jsonencode(
     {
@@ -34,7 +32,7 @@ resource "aws_ecr_lifecycle_policy" "stockpos_backend_lifecycle_policy" {
 
 # ECR URL in parameter store
 resource "aws_ssm_parameter" "ecr_url" {
-  provider    = aws.mumbai
+  provider    = aws.hyderabad
   name        = "stockpos-ecr-url"
   description = "ECR URL for stockpos"
   type        = "SecureString"

@@ -43,7 +43,7 @@ wget https://aws-codedeploy-$REGION.s3.$REGION.amazonaws.com/latest/install
 chmod +x ./install
 ./install auto
 
-aws s3 cp --recursive s3://$CONFIG_BUCKET/github-ssh/ ~/.ssh/ && chmod 400 ~/.ssh/id*
+aws s3 cp --recursive --region ap-southeast-1 s3://$CONFIG_BUCKET/github-ssh/ ~/.ssh/ && chmod 400 ~/.ssh/id*
 
 ssh-keyscan -t ed25519 github.com > ~/.ssh/known_hosts
 
@@ -64,7 +64,7 @@ if [ -d "$DIR" ]; then
     export REPO=`aws ssm get-parameter --name stockpos-ecr-url --with-decryption --query 'Parameter.Value' --output text`
 
     # Login ECR
-    aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $REPO
+    aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin $REPO
 
     sed -i "/^REPO=/c REPO=$REPO" $WORKDIR/.env
 
