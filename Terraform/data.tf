@@ -1,6 +1,6 @@
 data "aws_ssm_parameter" "ubuntu_image" {
   provider = aws.mumbai
-  name     = "/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
+  name     = replace("/aws/service/canonical/ubuntu/server/22.04/stable/current/{{MACHINE_TYPE}}/hvm/ebs-gp2/ami-id", "{{MACHINE_TYPE}}", var.machine_type)
 }
 
 # Get the Subnets in Mumbai Region

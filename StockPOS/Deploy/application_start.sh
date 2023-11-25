@@ -32,7 +32,7 @@ docker container prune -f
 
 # Try to remove the Old Image
 
-export OLD_IMAGE=`cat /home/ubuntu/old_image.txt`
+export OLD_IMAGE=`cat $HOME/old_image.txt`
 
 echo Old Image applicationStart: $OLD_IMAGE
 
@@ -44,7 +44,7 @@ docker image prune -f
 # Clean Up the Old Volumes
 docker volume prune -f
 
-rm -f /home/ubuntu/old_image.txt
+rm -f $HOME/old_image.txt
 
 if [ "$INSTANCE_ID" != "$ASSOCIATED_ID" ]
 then

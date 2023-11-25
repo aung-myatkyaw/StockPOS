@@ -24,11 +24,11 @@ resource "aws_db_instance" "stockpos_db_instance" {
   parameter_group_name                = aws_db_parameter_group.stockpos_db_pg.name
   password                            = random_password.stockpos_db_password.result
   # performance_insights_enabled        = true
-  port                                = 3306
-  publicly_accessible                 = true
-  skip_final_snapshot                 = true
-  username                            = "admin"
-  vpc_security_group_ids              = [aws_security_group.stockpos_db_sg.id]
+  port                   = 3306
+  publicly_accessible    = true
+  skip_final_snapshot    = true
+  username               = "admin"
+  vpc_security_group_ids = [aws_security_group.stockpos_db_sg.id]
 }
 
 resource "random_password" "stockpos_db_password" {

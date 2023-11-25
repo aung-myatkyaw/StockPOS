@@ -7,20 +7,24 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 usermod -aG docker ubuntu
 
+rm -rf ./get-docker.sh
+
 # install cloudwatch agent and apply configuration from ssm parameter store
-# wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/arm64/latest/amazon-cloudwatch-agent.deb # For ARM
-wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb # For AMD
+wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/$(dpkg --print-architecture)/latest/amazon-cloudwatch-agent.deb
 
 sudo dpkg -i -E ./amazon-cloudwatch-agent.deb
 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c ssm:AmazonCloudWatch-agent-config
 
+rm -rf ./amazon-cloudwatch-agent.deb
+
 # install aws cli
 apt-get update
 apt-get install -y unzip
-# curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip" # For ARM
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" # For AMD
+curl "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "awscliv2.zip"
 unzip awscliv2.zip
 ./aws/install
+
+rm -rf ./aws ./awscliv2.zip
 
 export TOKEN=`/usr/bin/curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
 
@@ -43,7 +47,7 @@ aws s3 cp --recursive s3://$CONFIG_BUCKET/github-ssh/ ~/.ssh/ && chmod 400 ~/.ss
 
 ssh-keyscan -t ed25519 github.com > ~/.ssh/known_hosts
 
-git clone --branch master git@github.com:yinko2/StockPOS.git /home/ubuntu/src && export DIR=$_
+git clone --branch master git@github.com:yinko2/StockPOS.git $HOME/src && export DIR=$_
 
 export WORKDIR=/opt/stockpos
 

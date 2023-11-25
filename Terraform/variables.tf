@@ -9,6 +9,7 @@ variable "aws_region_list_for_cidr" {
     "ap-southeast-1" = 0
     "ap-south-1"     = 1
     "us-west-2"      = 2
+    "ap-south-2"     = 3
   }
 }
 
@@ -36,6 +37,11 @@ variable "staging_spot_instance_types" {
   description = "Spot Instance Types for staging server"
   type        = list(string)
   default     = ["t2.micro"]
+}
+
+variable "machine_type" {
+  description = "Machine Architecture"
+  default     = "amd64"
 }
 
 variable "ecr_build_role_name" {

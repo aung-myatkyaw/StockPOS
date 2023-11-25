@@ -111,13 +111,8 @@ resource "aws_codebuild_project" "stockpos_mumbai_backend_build" {
   environment {
     compute_type = "BUILD_GENERAL1_SMALL"
 
-    # # For ARM machine
-    # image                       = "aws/codebuild/amazonlinux2-aarch64-standard:2.0"
-    # type                        = "ARM_CONTAINER"
-
-    # For AMD machine
-    image = "aws/codebuild/standard:6.0"
-    type  = "LINUX_CONTAINER"
+    image = var.machine_type == "amd64" ? "aws/codebuild/standard:6.0" : "aws/codebuild/amazonlinux2-aarch64-standard:2.0"
+    type  = var.machine_type == "amd64" ? "LINUX_CONTAINER" : "ARM_CONTAINER"
 
     image_pull_credentials_type = "CODEBUILD"
     privileged_mode             = true
