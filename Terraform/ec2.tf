@@ -17,6 +17,7 @@ resource "aws_launch_template" "stockpos_template" {
       delete_on_termination = true
       volume_size           = 10
       volume_type           = "gp3"
+      iops                  = 3000
     }
   }
 
@@ -37,7 +38,7 @@ resource "aws_launch_template" "stockpos_template" {
   }
 
   network_interfaces {
-    # associate_public_ip_address = true
+    associate_public_ip_address = true
     security_groups = [
       aws_security_group.stockpos_sg.id
     ]
@@ -154,15 +155,24 @@ resource "aws_instance" "stockpos_staging" {
     aws_db_instance.stockpos_db_instance
   ]
 
+  associate_public_ip_address = false
+  disable_api_stop            = false
+  disable_api_termination     = false
+  instance_type               = var.staging_spot_instance_types[0]
+  subnet_id                   = random_shuffle.subnet_for_stockpos.result[0]
+  tags = {
+    "Name" = "stockpos"
+  }
+
+  credit_specification {
+    cpu_credits = "standard"
+  }
+
   launch_template {
     id      = aws_launch_template.stockpos_template.id
     version = "$Default"
   }
-  instance_type = var.staging_spot_instance_types[0]
-  subnet_id     = random_shuffle.subnet_for_stockpos.result[0]
-  tags = {
-    "Name" = var.server_tag_value
-  }
+
   lifecycle {
     ignore_changes = [ami, user_data, launch_template]
   }
