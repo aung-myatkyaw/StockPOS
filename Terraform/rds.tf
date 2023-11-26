@@ -36,7 +36,7 @@ resource "random_password" "stockpos_db_password" {
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-resource "aws_ssm_parameter" "mysql_server_url" {
+resource "aws_ssm_parameter" "hyderabad_mysql_server_url" {
   provider    = aws.hyderabad
   name        = "mysql-server-url"
   description = "Server URL for MySQL"
@@ -44,7 +44,7 @@ resource "aws_ssm_parameter" "mysql_server_url" {
   value       = aws_db_instance.stockpos_db_instance.address
 }
 
-resource "aws_ssm_parameter" "mysql_username" {
+resource "aws_ssm_parameter" "hyderabad_mysql_username" {
   provider    = aws.hyderabad
   name        = "mysql-dbusername"
   description = "Server username for MySQL"
@@ -52,8 +52,53 @@ resource "aws_ssm_parameter" "mysql_username" {
   value       = aws_db_instance.stockpos_db_instance.username
 }
 
-resource "aws_ssm_parameter" "mysql_password" {
+resource "aws_ssm_parameter" "hyderabad_mysql_password" {
   provider    = aws.hyderabad
+  name        = "mysql-dbpassword"
+  description = "Admin Password for MySQL RDS"
+  type        = "SecureString"
+  value       = random_password.stockpos_db_password.result
+}
+
+resource "aws_ssm_parameter" "mumbai_mysql_server_url" {
+  provider    = aws.mumbai
+  name        = "mysql-server-url"
+  description = "Server URL for MySQL"
+  type        = "SecureString"
+  value       = aws_db_instance.stockpos_db_instance.address
+}
+
+resource "aws_ssm_parameter" "mumbai_mysql_username" {
+  provider    = aws.mumbai
+  name        = "mysql-dbusername"
+  description = "Server username for MySQL"
+  type        = "SecureString"
+  value       = aws_db_instance.stockpos_db_instance.username
+}
+
+resource "aws_ssm_parameter" "mumbai_mysql_password" {
+  provider    = aws.mumbai
+  name        = "mysql-dbpassword"
+  description = "Admin Password for MySQL RDS"
+  type        = "SecureString"
+  value       = random_password.stockpos_db_password.result
+}
+
+resource "aws_ssm_parameter" "mysql_server_url" {
+  name        = "mysql-server-url"
+  description = "Server URL for MySQL"
+  type        = "SecureString"
+  value       = aws_db_instance.stockpos_db_instance.address
+}
+
+resource "aws_ssm_parameter" "mysql_username" {
+  name        = "mysql-dbusername"
+  description = "Server username for MySQL"
+  type        = "SecureString"
+  value       = aws_db_instance.stockpos_db_instance.username
+}
+
+resource "aws_ssm_parameter" "mysql_password" {
   name        = "mysql-dbpassword"
   description = "Admin Password for MySQL RDS"
   type        = "SecureString"
