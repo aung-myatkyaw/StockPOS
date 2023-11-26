@@ -64,6 +64,8 @@ resource "aws_iam_policy" "codedeploy_s3_policy" {
           Resource = [
             aws_s3_bucket.codepipeline_bucket.arn,
             format("%s%s", aws_s3_bucket.codepipeline_bucket.arn, "/*"),
+            aws_s3_bucket.codedeploy_bucket.arn,
+            format("%s%s", aws_s3_bucket.codedeploy_bucket.arn, "/*"),
             data.aws_s3_bucket.config_bucket.arn,
             format("%s%s", data.aws_s3_bucket.config_bucket.arn, "/*"),
           ]

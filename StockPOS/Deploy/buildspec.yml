@@ -6,6 +6,7 @@ env:
     LATEST: "latest"
     ENV_TAG_KEY: "STOCKPOS_BACKEND_TAG"
     DOCKER_BUILDKIT: 1
+    ECR_REGION: "ap-southeast-1"
   parameter-store:
     REPO: stockpos-ecr-url
     DockerHub_USERNAME: dockerhub-username
@@ -16,7 +17,7 @@ phases:
       - echo Check Docker
       - docker --version
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REPO
+      - aws ecr get-login-password --region $ECR_REGION | docker login --username AWS --password-stdin $REPO
       - echo Pull Latest Image for cache
       - docker pull $REPO:$LATEST || true
       - echo Docker Hub Login
