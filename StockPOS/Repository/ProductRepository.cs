@@ -20,9 +20,11 @@ namespace StockPOS.Repository
             {
                 var query = from product in RepositoryContext.Products
                             join category in RepositoryContext.Productcategories on product.CategoryId equals category.CategoryId
-                            where 
-                            (string.IsNullOrEmpty(ProductName) || product.Name == ProductName) ||
-                            (string.IsNullOrEmpty(ShortName) || product.ShortName == ShortName)
+                            where
+                            //(string.IsNullOrEmpty(ProductName) || product.Name == ProductName) ||
+                            //(string.IsNullOrEmpty(ShortName) || product.ShortName == ShortName)
+                            ((string.IsNullOrEmpty(ProductName) || EF.Functions.Like(product.Name, $"%{ProductName}%"))) ||
+                            ((string.IsNullOrEmpty(ShortName) || EF.Functions.Like(product.ShortName, $"%{ShortName}%")))
                             select new Product_View_Model
                             {
                                 ProductId = product.ProductId,
