@@ -38,7 +38,7 @@ namespace StockPOS.Controllers
 
         // GET: api/Productcategory/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Productcategory>> GetProductcategory(int id)
+        public async Task<ActionResult<Productcategory>> GetProductcategory(string id)
         {
             var Productcategory = await _repositoryWrapper.Productcategory.FindByIDAsync(id);
 
