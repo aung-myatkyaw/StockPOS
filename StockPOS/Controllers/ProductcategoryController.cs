@@ -27,7 +27,7 @@ namespace StockPOS.Controllers
             try
             {
                 var Productcategorylist = await _repositoryWrapper.Productcategory.FindAllAsync();
-                return Ok(new { status = "success", data = Productcategorylist });
+                return Ok(Productcategorylist.OrderByDescending(ex=>ex.CreatedDate));
             }
             catch (Exception ex) 
             {
@@ -123,7 +123,7 @@ namespace StockPOS.Controllers
                 await _repositoryWrapper.Productcategory.CreateAsync(newObj, true); //add user to database
                 await _repositoryWrapper.Eventlog.Insert(newObj);
 
-                return StatusCode(StatusCodes.Status201Created, new { status = "success", data = new { newObj } });
+                return StatusCode(StatusCodes.Status201Created, newObj);
             }
             catch (Exception ex)
             {
