@@ -113,7 +113,6 @@ namespace StockPOS.Controllers
                     return StatusCode(StatusCodes.Status409Conflict, new { status = "fail", data = "Productcategory with CategoryName: " + productcategory.CategoryName + " already exists" });
                 }
 
-
                 var newObj = _mapper.Map<Productcategory>(productcategory);
 
                 newObj.CategoryId = GeneralUtility.GenerateGuid;
@@ -148,7 +147,7 @@ namespace StockPOS.Controllers
                 await _repositoryWrapper.Productcategory.DeleteAsync(Productcategory);
                 await _repositoryWrapper.Eventlog.Delete(Productcategory);
 
-                return Ok(new { status = "success", data = "Deleted"});
+                return Ok();
             }
             catch (Exception ex)
             {
