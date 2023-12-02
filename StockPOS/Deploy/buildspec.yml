@@ -13,7 +13,7 @@ env:
 phases:
   pre_build:
     commands:
-      - export VERSION=`grep '<Version>' < ./StockPOS/*.csproj | sed 's/.*<Version>\(.*\)<\/Version>/\1/'`
+      - export VERSION=`grep '<ReleaseVersion>' < ./StockPOS/*.csproj | sed 's/.*<ReleaseVersion>\(.*\)<\/ReleaseVersion>/\1/'`
       - echo Check Docker
       - docker --version
       - echo Logging in to Amazon ECR...
@@ -24,7 +24,7 @@ phases:
       - docker login -u $DockerHub_USERNAME -p $DockerHub_PASSWORD
   build:
     commands:
-      - echo Project Version $VERSION
+      - echo Project ReleaseVersion $VERSION
       - echo Building...
       - docker build --file ./StockPOS/Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 --tag $REPO:$VERSION --cache-from $REPO:$LATEST .
       - docker push $REPO:$VERSION
