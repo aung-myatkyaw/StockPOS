@@ -2,7 +2,6 @@ version: 0.2
 
 env:
   variables:
-    VERSION: "1.0.1"
     LATEST: "latest"
     ENV_TAG_KEY: "STOCKPOS_BACKEND_TAG"
     DOCKER_BUILDKIT: 1
@@ -14,6 +13,7 @@ env:
 phases:
   pre_build:
     commands:
+      - export VERSION=`grep '<Version>' < *.csproj | sed 's/.*<Version>\(.*\)<\/Version>/\1/'`
       - echo Check Docker
       - docker --version
       - echo Logging in to Amazon ECR...
@@ -24,6 +24,7 @@ phases:
       - docker login -u $DockerHub_USERNAME -p $DockerHub_PASSWORD
   build:
     commands:
+      - echo Project Version $VERSION
       - echo Building...
       - docker build --file ./StockPOS/Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 --tag $REPO:$VERSION --cache-from $REPO:$LATEST .
       - docker push $REPO:$VERSION
