@@ -19,7 +19,7 @@ export DB_PASSWORD=`aws ssm get-parameter --name mysql-dbpassword --with-decrypt
 export REPO=`aws ssm get-parameter --name stockpos-ecr-url --with-decryption --query 'Parameter.Value' --output text`
 
 # Login ECR
-aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $REPO
+aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin $REPO
 
 # Pull the new image
 docker compose -p $DEPLOYMENT_GROUP_NAME -f /opt/stockpos/docker-compose.yml pull
