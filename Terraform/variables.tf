@@ -102,5 +102,5 @@ variable "codedeploy_role_name" {
 variable "subscription_emails" {
   description = "Create Topic Subscriptions with these emails for current region"
   type        = list(string)
-  default     = ["aungmyatkyaw.kk@gmail.com"]
+  default     = ["aungmyatkyaw.kk@gmail.com","winkotun90@gmail.com"]
 }

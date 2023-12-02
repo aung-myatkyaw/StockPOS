@@ -20,7 +20,7 @@ resource "aws_cloudwatch_dashboard" "main" {
               ],
             ]
             period   = 60
-            region   = "ap-south-1"
+            region   = data.aws_region.current.name
             stacked  = true
             stat     = "Average"
             timezone = "+0630"
@@ -47,7 +47,7 @@ resource "aws_cloudwatch_dashboard" "main" {
               ],
             ]
             period   = 60
-            region   = "ap-south-1"
+            region   = data.aws_region.current.name
             stacked  = true
             stat     = "Average"
             timezone = "+0630"
@@ -74,7 +74,7 @@ resource "aws_cloudwatch_dashboard" "main" {
               ],
             ]
             period   = 300
-            region   = "ap-south-1"
+            region   = data.aws_region.current.name
             stacked  = true
             stat     = "Average"
             timezone = "+0630"
@@ -101,7 +101,7 @@ resource "aws_cloudwatch_dashboard" "main" {
               ],
             ]
             period    = 300
-            region    = "ap-south-1"
+            region    = data.aws_region.current.name
             sparkline = true
             stacked   = true
             stat      = "Average"
@@ -126,7 +126,7 @@ resource "aws_cloudwatch_dashboard" "main" {
               ],
             ]
             period    = 60
-            region    = "ap-south-1"
+            region    = data.aws_region.current.name
             sparkline = true
             stacked   = true
             stat      = "Average"
@@ -154,7 +154,7 @@ resource "aws_cloudwatch_dashboard" "main" {
               ],
             ]
             period    = 300
-            region    = "ap-south-1"
+            region    = data.aws_region.current.name
             sparkline = true
             stacked   = true
             stat      = "Average"
