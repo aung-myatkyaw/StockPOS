@@ -1,0 +1,12 @@
+name: <<Service-Name>>
+version: 1.0.0
+description: <<Description>>
+keywords:
+  - "<<App-Name>> - <<Service-Name>>"
+home: "https://amk.com"
+maintainers:
+  - name: Aung Myat Kyaw
+    email: aungmyatkyaw.kk@gmail.com
+    url: "https://amk.com"
+apiVersion: v1
+appVersion: "1.0.0"
