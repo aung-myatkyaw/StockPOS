@@ -1,6 +1,6 @@
 # STOCK Management API with AWS Infrastructure Setup
 
-This project is aimed at providing API endpoints for stock management, implemented using .NET 6.0 framework. Additionally, it includes Terraform configurations for setting up all AWS cloud resources required for the project to run seamlessly. The deployment utilizes AWS CodeDeploy to deploy the Docker image built from the source code, orchestrated with Docker Compose, onto an EC2 instance. The build process is handled by AWS CodeBuild using predefined scripts in the `STOCKPOS/Deploy/buildspec.yml`.
+This project is aimed at providing API endpoints for stock management, implemented using .NET 6.0 framework. Additionally, it includes Terraform configurations for setting up all AWS cloud resources required for the project to run seamlessly. The deployment utilizes AWS CodeDeploy to deploy the Docker image built from the source code, orchestrated with Docker Compose, onto an EC2 instance. The build process is handled by AWS CodeBuild using predefined scripts in the [StockPOS/StockPOS/Deploy/buildspec.yml](https://github.com/aung-myatkyaw/StockPOS/blob/master/StockPOS/Deploy/buildspec.yml).
 
 ## Project Structure
 
@@ -8,9 +8,9 @@ The project is divided into three main components:
 
 1. **Stock Management API**: This contains the .NET 6.0 application responsible for handling stock management operations through API endpoints.
 
-2. **Terraform Configurations**: This directory includes `Terraform` configurations to provision all AWS cloud resources necessary for the project, including VPC, subnets, security groups, IAM, EC2 instance, RDS, S3 buckets, CodePipeline, CloudWatch monitoring/alarms and SNS.
+2. **Terraform Configurations**: This directory includes [Terraform](https://github.com/aung-myatkyaw/StockPOS/tree/master/Terraform) configurations to provision all AWS cloud resources necessary for the project, including VPC, subnets, security groups, IAM, EC2 instance, RDS, S3 buckets, CodePipeline, CloudWatch monitoring/alarms and SNS.
 
-3. **AWS CodeBuild Configuration**: This project includes a `STOCKPOS/Deploy/buildspec.yml` file defining the build steps for AWS CodeBuild to compile the project and prepare it for deployment.
+3. **AWS CodeBuild Configuration**: This project includes a [StockPOS/StockPOS/Deploy/buildspec.yml](https://github.com/aung-myatkyaw/StockPOS/blob/master/StockPOS/Deploy/buildspec.yml) file defining the build steps for AWS CodeBuild to compile the project and prepare it for deployment.
 
 ## Requirements
 
@@ -32,7 +32,7 @@ To run this project, you need:
     Ensure that you have AWS credentials configured on your machine with appropriate permissions.
 
 3. **Provision AWS Infrastructure**:
-    Navigate to the `Terraform` directory and run:
+    Navigate to the [Terraform](https://github.com/aung-myatkyaw/StockPOS/tree/master/Terraform) directory and run:
     ```bash
     terraform init
     terraform plan
@@ -40,7 +40,7 @@ To run this project, you need:
     ```
 
 4. **Build and Deploy the API**:
-    - AWS CodeBuild will automatically trigger the build process based on the `STOCKPOS/Deploy/buildspec.yml` configuration.
+    - AWS CodeBuild will automatically trigger the build process based on the [StockPOS/StockPOS/Deploy/buildspec.yml](https://github.com/aung-myatkyaw/StockPOS/blob/master/StockPOS/Deploy/buildspec.yml) configuration.
     - Once the build is successful, AWS CodeDeploy will deploy the application using predefined configurations onto the provisioned EC2 instance.
 
 5. **Access the API**:
@@ -48,8 +48,8 @@ To run this project, you need:
 
 ## Additional Notes
 
-- Ensure that you review and customize the Terraform configurations (`Terraform/*.tf`) according to your specific requirements, such as region, instance type, etc.
-- Make sure to configure Docker Compose (`STOCKPOS/Deploy/docker-compose.yml`) and AWS CodeDeploy (`STOCKPOS/Deploy/*`) configurations as per your project needs.
+- Ensure that you review and customize the Terraform configurations in [Terraform](https://github.com/aung-myatkyaw/StockPOS/tree/master/Terraform) according to your specific requirements, such as region, instance type, etc.
+- Make sure to configure Docker Compose [StockPOS/StockPOS/Deploy/docker-compose.yml](https://github.com/aung-myatkyaw/StockPOS/blob/master/StockPOS/Deploy/docker-compose.yml) and AWS CodeDeploy [StockPOS/StockPOS/Deploy/appspec.yml](https://github.com/aung-myatkyaw/StockPOS/blob/master/StockPOS/Deploy/appspec.yml) configuration as per your project needs.
 - For security purposes, always keep your AWS credentials and sensitive information secure and avoid committing them to version control.
 
 ## Support
