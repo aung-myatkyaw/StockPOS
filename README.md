@@ -49,7 +49,7 @@ To run this project, you need:
 ## Additional Notes
 
 - Ensure that you review and customize the Terraform configurations (`Terraform/*.tf`) according to your specific requirements, such as region, instance type, etc.
-- Make sure to configure Docker Compose (`docker-compose.yml`) and AWS CodeDeploy (`STOCKPOS/Deploy/*`) configurations as per your project needs.
+- Make sure to configure Docker Compose (`STOCKPOS/Deploy/docker-compose.yml`) and AWS CodeDeploy (`STOCKPOS/Deploy/*`) configurations as per your project needs.
 - For security purposes, always keep your AWS credentials and sensitive information secure and avoid committing them to version control.
 
 ## Support
