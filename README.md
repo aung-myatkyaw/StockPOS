@@ -1,16 +1,14 @@
 # STOCK Management API with AWS Infrastructure Setup
 
-This project is aimed at providing API endpoints for stock management, implemented using .NET 6.0 framework. Additionally, it includes Terraform configurations for setting up all AWS cloud resources required for the project to run seamlessly. The deployment utilizes AWS CodeDeploy to deploy the Docker image built from the source code, orchestrated with Docker Compose, onto an EC2 instance. The build process is handled by AWS CodeBuild using predefined scripts in the [StockPOS/StockPOS/Deploy/buildspec.yml](https://github.com/aung-myatkyaw/StockPOS/blob/master/StockPOS/Deploy/buildspec.yml).
+This project is aimed at providing API endpoints for stock management, implemented using .NET 6.0 framework. Additionally, it includes Terraform configurations for setting up all AWS cloud resources required for the project to run seamlessly. The build process is handled by AWS CodeBuild using predefined scripts in the [StockPOS/StockPOS/Deploy/buildspec.yml](https://github.com/aung-myatkyaw/StockPOS/blob/master/StockPOS/Deploy/buildspec.yml). The deployment utilizes AWS CodeDeploy to deploy the Docker image built from the source code, orchestrated with Docker Compose, onto an EC2 instance.
 
 ## Project Structure
 
-The project is divided into three main components:
+The project is divided into two main components:
 
 1. **Stock Management API**: This contains the .NET 6.0 application responsible for handling stock management operations through API endpoints.
 
 2. **Terraform Configurations**: This directory includes [Terraform](https://github.com/aung-myatkyaw/StockPOS/tree/master/Terraform) configurations to provision all AWS cloud resources necessary for the project, including VPC, subnets, security groups, IAM, EC2 instance, RDS, S3 buckets, CodePipeline, CloudWatch monitoring/alarms and SNS.
-
-3. **AWS CodeBuild Configuration**: This project includes a [StockPOS/StockPOS/Deploy/buildspec.yml](https://github.com/aung-myatkyaw/StockPOS/blob/master/StockPOS/Deploy/buildspec.yml) file defining the build steps for AWS CodeBuild to compile the project and prepare it for deployment.
 
 ## Requirements
 
