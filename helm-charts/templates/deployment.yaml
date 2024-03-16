@@ -101,7 +101,7 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: {{ .Values.server.servlet.contextPath }}actuator/health
+              path: /
               port: http
             initialDelaySeconds: 60
             periodSeconds: 60
@@ -110,7 +110,7 @@ spec:
             failureThreshold: 5
           readinessProbe:
             httpGet:
-              path: {{ .Values.server.servlet.contextPath }}actuator/health
+              path: /health/ready
               port: http
             initialDelaySeconds: 60
             periodSeconds: 20
