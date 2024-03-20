@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: {{ include "service.fullname" . }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  exportTo:
+  - '*'
+  host: {{ include "service.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      http:
+        idleTimeout: {{ .Values.dr.trafficPolicy.connectionPool.idleTimeout }}
+      tcp:
+        connectTimeout: {{ .Values.dr.trafficPolicy.connectionPool.connectTimeout }}
+        maxConnections: {{ .Values.dr.trafficPolicy.connectionPool.maxConnections }}
+        tcpKeepalive:
+          interval: {{ .Values.dr.trafficPolicy.connectionPool.interval }}
+          time: {{ .Values.dr.trafficPolicy.connectionPool.time }}
+    portLevelSettings:
+    - loadBalancer:
+        simple: {{ .Values.dr.trafficPolicy.portLevelSettings.simple }}
+      port:
+        number: {{ .Values.dr.trafficPolicy.portLevelSettings.portNumber }}
+    tls:
+      mode: {{ .Values.dr.trafficPolicy.tls.mode }}

@@ -1,0 +1,201 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "service.fullname" . }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  {{- if eq .Values.hpa.enabled "false" }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "service.selectorLabels" . | nindent 6 }}
+      {{- if eq .Values.pinpoint.enabled "true" }}
+      pinpoint/name: {{ .Values.pinpoint.shortname }}
+      {{- end }}
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: {{ .Values.template.annotations.prometheusPath }}
+        prometheus.io/port: {{ .Values.template.annotations.prometheusPort }}
+        prometheus.io/scheme: {{ .Values.template.annotations.prometheusScheme }}
+        prometheus.io/scrape: {{ .Values.template.annotations.prometheusScrape }}
+        sidecar.istio.io/rewriteAppHTTPProbers: {{ .Values.template.annotations.istioAppHTTPProbers }}
+      labels:
+        {{- include "service.selectorLabels" . | nindent 8 }}
+        {{- if eq .Values.pinpoint.enabled "true" }}
+        pinpoint/name: {{ .Values.pinpoint.shortname }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "service.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        {{- if eq .Values.pinpoint.enabled "true" }}
+        - name: pinpoint-agent
+          emptyDir: {}
+        - name: pinpoint-config
+          configMap:
+            name: pinpoint-config
+        {{- end }}
+        {{- if eq .Values.appInsights.enabled "true" }}
+        - name: appinsights-jar
+          emptyDir: {}
+        - name: appinsights-config
+          configMap:
+            name: appinsights-config
+        {{- end }}
+        {{- if eq .Values.kafka.enabled "true" }}
+        - name: kafka-jksfiles
+          secret:
+            secretName: {{ .Values.kafka.secretName }}
+        {{- end }}
+        {{- if eq .Values.nfs.enabled "true" }}
+        - name: nfs-volume
+          nfs:
+            server: {{ .Values.nfs.server }}
+            path: {{ .Values.nfs.path }}
+        {{- end }}
+        {{- if eq .Values.sftp.enabled "true" }}
+        - name: sftp-key
+          secret:
+            secretName: {{ .Values.sftp.secretName }}
+        {{- end }}
+      initContainers:
+        {{- if eq .Values.pinpoint.enabled "true" }}
+        - name: pinpoint-agent
+          image: {{ .Values.image.registry }}/pinpoint-agent
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /pinpoint/pinpoint.config
+              name: pinpoint-config
+              subPath: pinpoint.config
+            - mountPath: /pinpoint-agent
+              name: pinpoint-agent
+        {{- end }}
+        {{- if eq .Values.appInsights.enabled "true" }}
+        - name: app-insights-agent-jar
+          image: {{ .Values.image.registry }}/app-insights-agent
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /appinsights-agent
+              name: appinsights-jar
+        {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.registry }}{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port.http }}
+              protocol: TCP
+            - name: grpc
+              containerPort: {{ .Values.service.port.grpc }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 14
+          env:
+            - name: MysqlDbSettings:Host
+              value: {{ .Values.mysql.host }}
+            - name: MysqlDbSettings:User
+              value: {{ .Values.mysql.user }}
+            - name: MysqlDbSettings:Password
+              value: {{ .Values.mysql.password }}
+            {{- if eq .Values.pinpoint.enabled "true" }}
+            - name: PINPOINT_APPLICATION_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.labels['pinpoint/name']
+            - name: PINPOINT_AGENT_ID
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: PINPOINT_OPTS
+              value: -javaagent:/pinpoint-agent/pinpoint-bootstrap.jar -Dpinpoint.applicationName=$(PINPOINT_APPLICATION_NAME) -Dpinpoint.agentId=$(PINPOINT_AGENT_ID) -Dpinpoint.config=/pinpoint-agent/pinpoint.config
+            {{- end }}
+            {{- if eq .Values.appInsights.enabled "true" }}
+            - name: APPLICATIONINSIGHTS_CONFIGURATION_FILE
+              value: /appinsights-agent/applicationinsights.json
+            - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+              value: {{ .Values.appInsights.connectionString }}
+            - name: APPLICATIONINSIGHTS_ROLE_NAME
+              value: {{ include "service.fullname" . }}
+            - name: JAVA_TOOL_OPTIONS
+              value: -javaagent:/appinsights-agent/applicationinsights-agent.jar
+            {{- end }}
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: ENVIRONMENT
+              value: {{ .Values.environment }}
+            - name: TZ
+              value: {{ .Values.timezone }}
+          volumeMounts:
+            {{- if eq .Values.pinpoint.enabled "true" }}
+            - mountPath: /pinpoint/pinpoint.config
+              name: pinpoint-config
+              subPath: pinpoint.config
+            - mountPath: /pinpoint-agent
+              name: pinpoint-agent
+            {{- end }}
+            {{- if eq .Values.appInsights.enabled "true" }}
+            - name: appinsights-jar
+              mountPath: /appinsights-agent
+            - name: appinsights-config
+              mountPath: /appinsights-agent/applicationinsights.json
+              subPath: applicationinsights.json
+            {{- end }}
+            {{- if eq .Values.kafka.enabled "true" }}
+            - name: kafka-jksfiles
+              mountPath: {{ .Values.kafka.mountPath }}
+            {{- end }}
+            {{- if eq .Values.nfs.enabled "true" }}
+            - name: nfs-volume
+              mountPath: {{ .Values.nfs.mountPath }}
+            {{- end }}
+            {{- if eq .Values.sftp.enabled "true" }}
+            - name: sftp-key
+              mountPath: {{ .Values.sftp.mountPath }}
+              readOnly: true
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
