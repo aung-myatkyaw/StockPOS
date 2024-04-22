@@ -1,0 +1,159 @@
+# Default values for helm charts.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  registry:
+  repository:
+  tag:
+  pullPolicy: Always
+
+imagePullSecrets:
+  - name: docker-registry-credentials
+nameOverride: ""
+fullnameOverride: ""
+
+environment:
+
+timezone: Asia/Yangon
+
+service:
+  type: ClusterIP
+  port:
+    http: 8080
+    grpc: 6565
+
+server:
+  servlet:
+    contextPath: /
+
+pinpoint:
+  enabled: "true"
+  shortname:
+
+appInsights:
+  enabled: "false"
+  connectionString: ""
+  jarDownloadURL: https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.4.18/applicationinsights-agent-3.4.18.jar
+
+env:
+  javaOpts: " -Dlog4j2.configurationFile=file:/config/log4j2.properties "
+
+actuator:
+  endpoint:
+
+mysql:
+  host:
+  user:
+  password:
+
+logserver:
+  host:
+  port:
+  loglevel:
+  type:
+  appenders: graylog
+
+spring:
+  application:
+    name:
+
+appEnv:
+
+# destination rule
+dr:
+  namespace:
+  trafficPolicy:
+    connectionPool:
+      idleTimeout: 10800s
+      connectTimeout: 30ms
+      maxConnections: 100
+      interval: 75s
+      time: 7200s
+    portLevelSettings:
+      simple: LEAST_REQUEST
+      portNumber: 6565
+    tls:
+      mode: ISTIO_MUTUAL
+
+# virtual service
+vs:
+  apiVersion: networking.istio.io/v1beta1
+  perTryTimeoutEnabled: "true"
+  perTryTimeout: 30s
+  httpRetryEnabled: "false"
+  httpAttempts: 3
+  httpRetryOn: gateway-error,connect-failure,refused-stream,5xx,reset,retriable-4xx
+  grpcRetryEnabled: "false"
+  grpcAttempts: 3
+  grpcRetryOn: unavailable,gateway-error,connect-failure,refused-stream
+
+hpa:
+  apiVersion: autoscaling/v2beta2
+  enabled: "false"
+  maxReplicas: 1
+  minReplicas: 1
+  cpuUtilization: 80
+  memoryUtilization: 80
+
+kafka:
+  enabled: "false"
+  secretName: ""
+  mountPath: /keystore
+
+nfs:
+  enabled: "false"
+  server: ""
+  path: ""
+  mountPath: ""
+
+sftp:
+  enabled: "false"
+  secretName: ""
+  mountPath: /key
+
+template:
+  annotations:
+    prometheusPath:
+    prometheusPort:
+    prometheusScheme:
+    prometheusScrape:
+    istioAppHTTPProbers:
+  label:
+    storageEnable: "false"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

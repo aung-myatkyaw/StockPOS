@@ -1,0 +1,40 @@
+apiVersion: {{ .Values.vs.apiVersion }}
+kind: VirtualService
+metadata:
+  name: {{ include "service.fullname" . }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  hosts:
+  - {{ include "service.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  http:
+  - match:
+    - port: {{ .Values.service.port.http }}
+    {{- if eq .Values.vs.httpRetryEnabled "true" }}
+    retries:
+      attempts: {{ .Values.vs.httpAttempts }}
+      {{- if eq .Values.vs.perTryTimeoutEnabled "true" }}
+      perTryTimeout: {{ .Values.vs.perTryTimeout }}
+      {{- end }}
+      retryOn: {{ .Values.vs.httpRetryOn }}
+    {{- end }}
+    route:
+    - destination:
+        host: {{ include "service.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+        port:
+          number: {{ .Values.service.port.http }}
+  - match:
+    - port: {{ .Values.service.port.grpc }}
+    {{- if eq .Values.vs.grpcRetryEnabled "true" }}
+    retries:
+      attempts: {{ .Values.vs.grpcAttempts }}
+      {{- if eq .Values.vs.perTryTimeoutEnabled "true" }}
+      perTryTimeout: {{ .Values.vs.perTryTimeout }}
+      {{- end }}
+      retryOn: {{ .Values.vs.grpcRetryOn }}
+    {{- end }}
+    route:
+    - destination:
+        host: {{ include "service.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+        port:
+          number: {{ .Values.service.port.grpc }}

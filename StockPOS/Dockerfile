@@ -1,24 +1,20 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine AS base
-WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["StockPOS/StockPOS.csproj", "StockPOS/"]
-RUN dotnet restore "StockPOS/StockPOS.csproj"
 COPY . .
-WORKDIR "/src/StockPOS"
+RUN dotnet restore
 
 #ENV MysqlDbSettings:Password="${DB_PWD}"
-RUN dotnet build "StockPOS.csproj" -c Release -o /app/build
+RUN dotnet build -c Release -o build --no-restore
 
-FROM build AS publish
-RUN dotnet publish "StockPOS.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish -c Release -o publish --no-restore /p:UseAppHost=false /p:AssemblyName=DotNetApplication
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "StockPOS.dll"]
+COPY --from=build /src/publish .
+ENTRYPOINT ["dotnet", "DotNetApplication.dll"]
