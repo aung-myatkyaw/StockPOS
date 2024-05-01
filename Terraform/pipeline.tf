@@ -165,7 +165,7 @@ resource "aws_codedeploy_app" "stockpos_codedeploy_application" {
 resource "aws_codedeploy_deployment_group" "stockpos_codedeploy_group" {
   provider              = aws.hyderabad
   app_name              = aws_codedeploy_app.stockpos_codedeploy_application.name
-  deployment_group_name = var.codedeploy_group_name
+  deployment_group_name = var.environment
   service_role_arn      = aws_iam_role.codedeploy_role.arn
 
   auto_rollback_configuration {
@@ -178,6 +178,11 @@ resource "aws_codedeploy_deployment_group" "stockpos_codedeploy_group" {
       key   = "Name"
       type  = "KEY_AND_VALUE"
       value = var.server_tag_value
+    }
+    ec2_tag_filter {
+      key   = "Env"
+      type  = "KEY_AND_VALUE"
+      value = var.environment
     }
   }
 }

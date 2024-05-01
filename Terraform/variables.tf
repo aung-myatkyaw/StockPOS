@@ -60,8 +60,13 @@ variable "github_connection_name" {
 }
 
 variable "backend_git_url" {
-  description = "Backend GitHub Repo name"
-  default     = "yinko2/StockPOS"
+  description = "Backend Gitlab Repo name"
+  default     = "git@gitlab.com:aungmyatkyaw/dexon-devops-backend.git"
+}
+
+variable "backend_git_branch" {
+  description = "Branch Name"
+  default     = "feature/first-version"
 }
 
 variable "git_branch" {
@@ -89,9 +94,9 @@ variable "codedeploy_application_name" {
   default     = "StockPOS-CodeDeploy-Application-{{REGION_NAME}}"
 }
 
-variable "codedeploy_group_name" {
-  description = "Codedeploy Group Name"
-  default     = "production"
+variable "environment" {
+  description = "Env Value for server"
+  default     = "dev"
 }
 
 variable "codedeploy_role_name" {

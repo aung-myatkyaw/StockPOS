@@ -8,6 +8,8 @@ export REGION=`/usr/bin/curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169
 
 export TAG=`/usr/bin/curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/tags/instance/Name`
 
+export ENV=`/usr/bin/curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/tags/instance/Env`
+
 export ASSOCIATED_ID=`aws ec2 describe-addresses --output text --region $REGION --query 'Addresses[*].InstanceId' --filters Name="tag:Name",Values="$TAG"`
 
 # source /opt/stockpos/.env
@@ -17,6 +19,7 @@ export DB_SERVER_URL=`aws ssm get-parameter --name mysql-server-url --with-decry
 export DB_USERNAME=`aws ssm get-parameter --name mysql-dbusername --with-decryption --query 'Parameter.Value' --output text`
 export DB_PASSWORD=`aws ssm get-parameter --name mysql-dbpassword --with-decryption --query 'Parameter.Value' --output text`
 export REPO=`aws ssm get-parameter --name stockpos-ecr-url --with-decryption --query 'Parameter.Value' --output text`
+export IMAGE_TAG=`aws ssm get-parameter --name stockpos-backend-tag --with-decryption --query 'Parameter.Value' --output text`
 
 # Login ECR
 aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin $REPO
@@ -49,7 +52,7 @@ rm -f $HOME/old_image.txt
 if [ "$INSTANCE_ID" != "$ASSOCIATED_ID" ]
 then
     # Retrieve the Elastic IP using the meta-data
-    export EID=$(echo $(aws ec2 describe-addresses --output text --region $REGION --query 'Addresses[*].AllocationId' --filters Name="tag:Name",Values="$TAG") | cut --delimiter " " --fields 1)
+    export EID=$(echo $(aws ec2 describe-addresses --output text --region $REGION --query 'Addresses[*].AllocationId' --filters Name="tag:Name",Values="$TAG" --filters Name="tag:Env",Values="$ENV") | cut --delimiter " " --fields 1)
 
     # Check the IP and associate with current instance
     [ ! -z "$EID" ] && aws ec2 associate-address --instance-id $INSTANCE_ID --allocation-id $EID --allow-reassociation

@@ -47,18 +47,30 @@ resource "aws_launch_template" "stockpos_template" {
   update_default_version = true
   image_id               = data.aws_ssm_parameter.ubuntu_image.value
   # user_data              = filebase64("startup_script.sh")
-  user_data = base64encode(replace(file("startup_script.sh"), "{{Config-Bucket-Name}}", var.configs_bucket_name))
+  user_data = base64encode(replace(
+    replace(
+      replace(
+        file(
+        "startup_script.sh"), "{{Config_Bucket_Name}}", var.configs_bucket_name
+      ),
+      "{{Backend_Git_Branch}}", var.backend_git_branch
+    ),
+    "{{Backend_Git_Url}}", var.backend_git_url
+    )
+  )
 
   tag_specifications {
     resource_type = "instance"
     tags = {
-      "Name" = var.server_tag_value
+      "Name" = var.server_tag_value,
+      "Env"  = var.environment
     }
   }
   tag_specifications {
     resource_type = "volume"
     tags = {
-      "Name" = var.server_tag_value
+      "Name" = var.server_tag_value,
+      "Env"  = var.environment
     }
   }
 }
@@ -184,6 +196,7 @@ resource "aws_eip" "stockpos_ip" {
   instance = aws_instance.stockpos_staging.id
   tags = {
     "Name" = var.server_tag_value
+    "Env"  = var.environment
   }
   domain = "vpc"
 }

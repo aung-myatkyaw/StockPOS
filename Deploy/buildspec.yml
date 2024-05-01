@@ -37,12 +37,12 @@ phases:
     commands:
       - echo Making File for CodeDeploy
       # - cp ./deploy/scripts/deploy.sh.tpl ./deploy.sh
-      - sed -i "/^$ENV_TAG_KEY=/c $ENV_TAG_KEY=$VERSION" ./StockPOS/Deploy/.env
-      - sed -i "/^REPO=/c REPO=$REPO" ./StockPOS/Deploy/.env
+      - sed -i "/^$ENV_TAG_KEY=/c $ENV_TAG_KEY=$VERSION" ./Deploy/.env
+      - sed -i "/^REPO=/c REPO=$REPO" ./Deploy/.env
 artifacts:
   files:
-    - 'StockPOS/Deploy/docker-compose.yml'
-    - 'StockPOS/Deploy/.env'
-    - 'StockPOS/Deploy/*.sh'
-    - 'StockPOS/Deploy/appspec.yml'
+    - 'Deploy/docker-compose.yml'
+    - 'Deploy/.env'
+    - 'Deploy/*.sh'
+    - 'Deploy/appspec.yml'
   discard-paths: yes

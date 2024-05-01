@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export CONFIG_BUCKET="{{Config-Bucket-Name}}"
+export CONFIG_BUCKET="{{Config_Bucket_Name}}"
 
 # install docker
 curl -fsSL https://get.docker.com -o get-docker.sh
@@ -34,6 +34,8 @@ export REGION=`/usr/bin/curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169
 
 export TAG=`/usr/bin/curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/tags/instance/Name`
 
+export ENV=`/usr/bin/curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/tags/instance/Env`
+
 export ASSOCIATED_ID=`aws ec2 describe-addresses --output text --region $REGION --query 'Addresses[*].InstanceId' --filters Name="tag:Name",Values="$TAG"`
 
 # install codedeploy agent
@@ -43,17 +45,17 @@ wget https://aws-codedeploy-$REGION.s3.$REGION.amazonaws.com/latest/install
 chmod +x ./install
 ./install auto
 
-aws s3 cp --recursive --region ap-southeast-1 s3://$CONFIG_BUCKET/github-ssh/ ~/.ssh/ && chmod 400 ~/.ssh/id*
+aws s3 cp --recursive --region ap-southeast-1 s3://$CONFIG_BUCKET/gitlab-ssh/ ~/.ssh/ && chmod 400 ~/.ssh/id*
 
-ssh-keyscan -t ed25519 github.com > ~/.ssh/known_hosts
+ssh-keyscan -t ed25519 gitlab.com > ~/.ssh/known_hosts
 
-git clone --branch master git@github.com:yinko2/StockPOS.git $HOME/src && export DIR=$_
+git clone --branch {{Backend_Git_Branch}} {{Backend_Git_Url}} $HOME/src && export DIR=$_
 
 export WORKDIR=/opt/stockpos
 
 if [ -d "$DIR" ]; then
     # Take action if $DIR exists. #
-    mkdir -p $WORKDIR/ && cp $DIR/StockPOS/Deploy/.env $DIR/StockPOS/Deploy/docker-compose.yml -t $WORKDIR/
+    mkdir -p $WORKDIR/ && cp $DIR/Deploy/.env $DIR/Deploy/docker-compose.yml -t $WORKDIR/
 
     # source $WORKDIR/.env
 
@@ -62,14 +64,18 @@ if [ -d "$DIR" ]; then
     export DB_USERNAME=`aws ssm get-parameter --name mysql-dbusername --with-decryption --query 'Parameter.Value' --output text`
     export DB_PASSWORD=`aws ssm get-parameter --name mysql-dbpassword --with-decryption --query 'Parameter.Value' --output text`
     export REPO=`aws ssm get-parameter --name stockpos-ecr-url --with-decryption --query 'Parameter.Value' --output text`
+    export IMAGE_TAG=`aws ssm get-parameter --name stockpos-backend-tag --with-decryption --query 'Parameter.Value' --output text`
 
     # Login ECR
-    aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin $REPO
+    aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $REPO
+
+    # Update the .env file with existing backend image
+    [ ! -z "$IMAGE_TAG" ] && sed -i "/^STOCKPOS_BACKEND_TAG=/c STOCKPOS_BACKEND_TAG=$IMAGE_TAG" $WORKDIR/.env
 
     sed -i "/^REPO=/c REPO=$REPO" $WORKDIR/.env
 
     # Recreate the containers with new image
-    docker compose -p production -f $WORKDIR/docker-compose.yml --env-file $WORKDIR/.env up -d --force-recreate
+    docker compose -p $ENV -f $WORKDIR/docker-compose.yml --env-file $WORKDIR/.env up -d --force-recreate
 
     # Clean Up the Stop Containers
     docker container prune -f
@@ -87,7 +93,7 @@ fi
 if [ "$INSTANCE_ID" != "$ASSOCIATED_ID" ]
 then
     # Retrieve the Elastic IP using the meta-data
-    export EID=$(echo $(aws ec2 describe-addresses --output text --region $REGION --query 'Addresses[*].AllocationId' --filters Name="tag:Name",Values="$TAG") | cut --delimiter " " --fields 1)
+    export EID=$(echo $(aws ec2 describe-addresses --output text --region $REGION --query 'Addresses[*].AllocationId' --filters Name="tag:Name",Values="$TAG" --filters Name="tag:Env",Values="$ENV") | cut --delimiter " " --fields 1)
 
     # Check the IP and associate with current instance
     [ ! -z "$EID" ] && aws ec2 associate-address --instance-id $INSTANCE_ID --allocation-id $EID --allow-reassociation
